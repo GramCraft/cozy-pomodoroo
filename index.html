@@ -1579,21 +1579,34 @@ function unlockAudio() {
   } catch { /* audio is optional */ }
 }
 
+function bell(freq, at, length, volume) {
+  const ctx = state.audio;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(volume, at + 0.025);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + length);
+  gain.connect(ctx.destination);
+
+  [1, 2.01].forEach((multiple, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq * multiple;
+    const layer = ctx.createGain();
+    layer.gain.value = i ? 0.22 : 1;
+    osc.connect(layer).connect(gain);
+    osc.start(at);
+    osc.stop(at + length + 0.05);
+  });
+}
+
 function chime(isFocus) {
   if (!state.sound || !state.audio) return;
-  const notes = isFocus ? [523.25, 659.25, 783.99] : [659.25, 523.25];
+  const ctx = state.audio;
+  if (ctx.state === "suspended") ctx.resume();
+  const at = ctx.currentTime + 0.02;
+  const notes = isFocus ? [523.25, 659.25, 783.99, 1046.5] : [783.99, 659.25, 523.25];
   notes.forEach((freq, i) => {
-    const osc = state.audio.createOscillator();
-    const gain = state.audio.createGain();
-    const t = state.audio.currentTime + i * 0.13;
-    osc.type = "sine";
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.65);
-    osc.connect(gain).connect(state.audio.destination);
-    osc.start(t);
-    osc.stop(t + 0.7);
+    bell(freq, at + i * 0.14, isFocus ? 1.1 : 0.85, i === notes.length - 1 ? 0.18 : 0.14);
   });
 }
 
@@ -1696,6 +1709,14 @@ el.ringButtons.forEach(button => button.addEventListener("click", () => {
   persist();
   render();
 }));
+
+function unlockOnce() {
+  unlockAudio();
+  document.removeEventListener("pointerdown", unlockOnce);
+  document.removeEventListener("keydown", unlockOnce);
+}
+document.addEventListener("pointerdown", unlockOnce);
+document.addEventListener("keydown", unlockOnce);
 
 function toggleFocus() {
   closeSettings();
