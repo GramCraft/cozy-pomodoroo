@@ -284,6 +284,23 @@ body[data-scene="neon-alley"] .art::after {
   background: radial-gradient(55% 35% at 20% 100%, rgba(220, 100, 200, .16), transparent 70%);
 }
 
+/* sunlit attic — a soft sunbeam full of dust */
+body[data-scene="sunlit-attic"] .art::before {
+  background:
+    linear-gradient(115deg, transparent 18%, rgba(255, 245, 200, .42) 22%, transparent 34%),
+    linear-gradient(115deg, transparent 48%, rgba(255, 245, 200, .30) 52%, transparent 62%);
+  filter: blur(8px);
+  animation: steam 14s ease-in-out infinite alternate;
+}
+body[data-scene="sunlit-attic"] .art::after {
+  background-image:
+    radial-gradient(circle, rgba(180, 140, 70, .22) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(180, 140, 70, .16) 0 1.5px, transparent 2.5px);
+  background-size: 120px 120px, 190px 190px;
+  background-position: 30px 40px, 90px 110px;
+  animation: twinkle 9s ease-in-out infinite alternate;
+}
+
 /* ============================================================
    scenes — each name is a whole little world
    ============================================================ */
@@ -404,6 +421,15 @@ body[data-scene="neon-alley"] {
   --glow-a: rgba(220, 110, 210, .28); --glow-b: rgba(90, 170, 230, .24);
   --chip: rgba(255, 255, 255, .05); --shadow: 0 30px 80px rgba(10, 0, 20, .50);
   --on-accent: #200d28;
+}
+body[data-scene="sunlit-attic"] {
+  --bg: linear-gradient(150deg, #fbf3d9 0%, #f6dfa4 52%, #fff7e2 100%);
+  --ink: #4a3b1f; --muted: #8d7a4e;
+  --panel: rgba(255, 252, 240, .74); --line: rgba(140, 105, 40, .13);
+  --accent: #d9a441; --accent-2: #b97c22; --track: rgba(180, 140, 50, .12);
+  --glow-a: rgba(250, 215, 130, .36); --glow-b: rgba(230, 190, 110, .26);
+  --chip: rgba(255, 255, 255, .60); --shadow: 0 30px 80px rgba(120, 90, 30, .16);
+  --on-accent: #ffffff;
 }
 
 /* ============================================================
@@ -925,6 +951,7 @@ const SCENES = [
   { id: "snow-lodge",    name: "snow lodge",     swatch: "#6ba6cc", preview: "linear-gradient(135deg, #d9e9f2, #b9d4e6 55%, #6ba6cc)", hint: "soft snow, warm window" },
   { id: "forest-nook",   name: "forest nook",    swatch: "#9bd67f", preview: "linear-gradient(135deg, #0b1a13, #173c29 55%, #9bd67f)", hint: "fireflies in the dark" },
   { id: "neon-alley",    name: "neon alley",     swatch: "#e58fd6", preview: "linear-gradient(135deg, #120b1e, #2a1240 55%, #e58fd6)", hint: "pink and blue after dark" },
+  { id: "sunlit-attic",  name: "sunlit attic",   swatch: "#d9a441", preview: "linear-gradient(135deg, #fbf3d9, #f6dfa4 55%, #d9a441)", hint: "dust in a sunbeam" },
 ];
 
 const STORE_KEY = "cozy-pomodoro-v1";
