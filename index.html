@@ -876,6 +876,18 @@ main {
   place-items: center;
   transition: width .5s var(--ease);
 }
+.timer.pulse { animation: timerPulse .95s var(--ease); }
+.timer.pulse .ring-progress { animation: ringPulse .95s var(--ease); }
+@keyframes timerPulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes ringPulse {
+  0% { stroke-width: 5; filter: drop-shadow(0 0 10px var(--glow-a)); }
+  35% { stroke-width: 10; filter: drop-shadow(0 0 34px var(--glow-a)); }
+  100% { stroke-width: 5; filter: drop-shadow(0 0 10px var(--glow-a)); }
+}
 .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
 .ring rect {
   fill: none;
@@ -1405,6 +1417,7 @@ const el = {
   scenePillName: document.getElementById("scene-pill-name"),
   modes: [...document.querySelectorAll(".mode")],
   time: document.getElementById("time"),
+  timer: document.querySelector(".timer"),
   ring: document.getElementById("ring"),
   start: document.getElementById("start"),
   reset: document.getElementById("reset"),
@@ -1611,6 +1624,15 @@ function setMode(mode) {
   render();
 }
 
+function pulseTimer() {
+  const timer = el.timer;
+  if (!timer) return;
+  timer.classList.remove("pulse");
+  void timer.offsetWidth;
+  timer.classList.add("pulse");
+  const cleanup = () => { timer.classList.remove("pulse"); timer.removeEventListener("animationend", cleanup); };
+  timer.addEventListener("animationend", cleanup);
+}
 function finish(countSession = true) {
   const wasFocus = state.mode === "focus";
   const wasLong = state.mode === "long";
@@ -1628,6 +1650,7 @@ function finish(countSession = true) {
     persist();
   }
   chime(wasFocus);
+  pulseTimer();
   setMode(next);
   if (state.auto) start();
   showToast(wasFocus ? "nice work — take a breath ☕"
