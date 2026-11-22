@@ -687,7 +687,7 @@ footer {
       </div>
       <div class="top-right">
         <button id="scene-pill" class="scene-pill" type="button" title="Open scene settings">
-          <span class="dot" aria-hidden="true"></span><span id="scene-pill-name">mint</span>
+          <span class="dot" aria-hidden="true"></span><span id="scene-pill-name">mint room</span>
         </button>
         <button id="settings-btn" class="icon-btn" type="button" aria-label="Open settings" title="Settings">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.01A1.7 1.7 0 0 0 21 10.03h.09a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6.97Z"/></svg>
@@ -795,14 +795,14 @@ footer {
 /* cozy pomodoro — all the little ticks and moods */
 
 const SCENES = [
-  { id: "midnight-mint", name: "mint",     swatch: "#86e6bd", preview: "linear-gradient(135deg, #081415, #1a4a46 60%, #86e6bd)", hint: "cool and quiet" },
-  { id: "honey-lamp",    name: "honey",    swatch: "#ffc879", preview: "linear-gradient(135deg, #24170f, #7a4b21 60%, #ffc879)", hint: "warm and golden" },
-  { id: "rainy-window",  name: "rain",     swatch: "#9ed8f5", preview: "linear-gradient(135deg, #0d1927, #2c5577 60%, #9ed8f5)", hint: "soft blue rain" },
-  { id: "cocoa-evening", name: "cocoa",    swatch: "#e6b48d", preview: "linear-gradient(135deg, #17100d, #4a3025 60%, #e6b48d)", hint: "slow and cozy" },
-  { id: "matcha-cloud",  name: "matcha",   swatch: "#4e9a70", preview: "linear-gradient(135deg, #eaf1e3, #a9cca7 60%, #4e9a70)", hint: "fresh and light" },
-  { id: "rose-steam",    name: "rose",     swatch: "#c76f84", preview: "linear-gradient(135deg, #f5e7e6, #dca8b3 60%, #c76f84)", hint: "soft and rosy" },
-  { id: "cairo-dusk",    name: "dusk",     swatch: "#efc979", preview: "linear-gradient(135deg, #0a1e22, #1c5550 55%, #efc979)", hint: "golden night" },
-  { id: "lavender-haze", name: "lavender", swatch: "#8569c4", preview: "linear-gradient(135deg, #e9e5f5, #ada2d5 60%, #8569c4)", hint: "dreamy and calm" },
+  { id: "midnight-mint", name: "mint room",     swatch: "#86e6bd", preview: "linear-gradient(135deg, #081415, #1a4a46 60%, #86e6bd)", hint: "cool and quiet" },
+  { id: "honey-lamp",    name: "honey nook",    swatch: "#ffc879", preview: "linear-gradient(135deg, #24170f, #7a4b21 60%, #ffc879)", hint: "warm and golden" },
+  { id: "rainy-window",  name: "rain window",     swatch: "#9ed8f5", preview: "linear-gradient(135deg, #0d1927, #2c5577 60%, #9ed8f5)", hint: "soft blue rain" },
+  { id: "cocoa-evening", name: "cocoa corner",    swatch: "#e6b48d", preview: "linear-gradient(135deg, #17100d, #4a3025 60%, #e6b48d)", hint: "slow and cozy" },
+  { id: "matcha-cloud",  name: "matcha garden",   swatch: "#4e9a70", preview: "linear-gradient(135deg, #eaf1e3, #a9cca7 60%, #4e9a70)", hint: "fresh and light" },
+  { id: "rose-steam",    name: "rose bath",     swatch: "#c76f84", preview: "linear-gradient(135deg, #f5e7e6, #dca8b3 60%, #c76f84)", hint: "soft and rosy" },
+  { id: "cairo-dusk",    name: "desert camp",     swatch: "#efc979", preview: "linear-gradient(135deg, #0a1e22, #1c5550 55%, #efc979)", hint: "golden night" },
+  { id: "lavender-haze", name: "lavender field", swatch: "#8569c4", preview: "linear-gradient(135deg, #e9e5f5, #ada2d5 60%, #8569c4)", hint: "dreamy and calm" },
 ];
 
 const STORE_KEY = "cozy-pomodoro-v1";
