@@ -115,190 +115,478 @@ body {
   to   { opacity: .85; transform: translateY(-10px) scale(1.05); }
 }
 
-/* --- every scene gets its own little texture, not just a color --- */
-.art { position: absolute; inset: 0; }
+/* --- scene art: every place is built from a few distinct shapes --- */
+.art { position: absolute; inset: 0; z-index: 2; }
 .art::before, .art::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.piece { position: absolute; pointer-events: none; }
 
-/* mint — a slow, starry sky */
+@keyframes sway {
+  from { transform: rotate(-1.1deg); }
+  to   { transform: rotate(1.1deg); }
+}
+@keyframes flicker {
+  0%, 44%, 52%, 100% { opacity: 1; }
+  46% { opacity: .62; }
+  49% { opacity: .9; }
+}
+@keyframes shimmer {
+  from { background-position: 0 0; }
+  to   { background-position: 0 54px; }
+}
+
+/* the soft halo only belongs to the outdoor night scenes */
+body[data-scene="honey-lamp"] .sky::before,
+body[data-scene="rainy-window"] .sky::before,
+body[data-scene="cocoa-evening"] .sky::before,
+body[data-scene="matcha-cloud"] .sky::before,
+body[data-scene="rose-steam"] .sky::before,
+body[data-scene="lavender-haze"] .sky::before,
+body[data-scene="snow-lodge"] .sky::before,
+body[data-scene="forest-nook"] .sky::before,
+body[data-scene="neon-alley"] .sky::before,
+body[data-scene="sunlit-attic"] .sky::before { opacity: 0; }
+body[data-scene="midnight-mint"] .sky::before { opacity: .22; }
+body[data-scene="cairo-dusk"] .sky::before { opacity: .20; }
+body[data-scene="peach-terrace"] .sky::before { opacity: .30; }
+body[data-scene="ocean-cabin"] .sky::before { opacity: .20; top: -8vh; right: auto; left: 50vw; }
+
+/* mint room — a crisp moon, scattered stars, and a low horizon */
 body[data-scene="midnight-mint"] .art::before {
   background-image:
-    radial-gradient(circle, rgba(233, 255, 244, .85) 1px, transparent 1.6px),
-    radial-gradient(circle, rgba(185, 255, 240, .55) 1px, transparent 1.6px);
-  background-size: 130px 130px, 190px 190px;
-  background-position: 18px 26px, 88px 104px;
+    radial-gradient(circle, rgba(233, 255, 244, .95) 1.5px, transparent 2px),
+    radial-gradient(circle, rgba(185, 255, 240, .70) 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(255, 255, 255, .85) 1px, transparent 1.5px);
+  background-size: 120px 120px, 190px 190px, 260px 260px;
+  background-position: 18px 26px, 88px 104px, 160px 60px;
   animation: twinkle 7s ease-in-out infinite alternate;
 }
 body[data-scene="midnight-mint"] .art::after {
-  background: radial-gradient(70% 45% at 50% 105%, rgba(90, 210, 170, .10), transparent 70%);
+  inset: auto 0 0 0;
+  height: 27%;
+  background: linear-gradient(180deg, rgba(40, 130, 110, .06), rgba(16, 72, 64, .42));
+  clip-path: polygon(0 58%, 16% 34%, 34% 62%, 52% 26%, 72% 60%, 88% 32%, 100% 54%, 100% 100%, 0 100%);
+}
+body[data-scene="midnight-mint"] .p1 {
+  top: 9vh; right: 13vw;
+  width: min(20vh, 190px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #f4fffa, #bde9d6 62%, #7cc7ac 100%);
+  box-shadow: 0 0 70px 16px rgba(150, 235, 205, .26);
 }
 
-/* honey — floating golden dust and a soft beam */
+/* honey nook — a hanging lamp spills a cone of warm light */
 body[data-scene="honey-lamp"] .art::before {
-  background-image: radial-gradient(circle, rgba(255, 220, 160, .16) 0 4px, transparent 5px);
+  background-image: radial-gradient(circle, rgba(255, 220, 160, .20) 0 4px, transparent 5px);
   background-size: 88px 88px;
   background-position: 14px 32px;
+  animation: twinkle 9s ease-in-out infinite alternate;
 }
 body[data-scene="honey-lamp"] .art::after {
-  background: conic-gradient(from 195deg at 12% 92%, transparent 0deg, rgba(255, 190, 110, .10) 26deg, transparent 52deg);
+  inset: auto 0 0 0;
+  height: 34%;
+  background: radial-gradient(ellipse 55% 100% at 24% 100%, rgba(255, 190, 110, .18), transparent 72%);
+}
+body[data-scene="honey-lamp"] .p1 {
+  top: 14vh; left: 10vw; width: 28vw; height: 86vh;
+  background: linear-gradient(180deg, rgba(255, 205, 130, .32), transparent 78%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+}
+body[data-scene="honey-lamp"] .p2 {
+  top: 0; left: 24vw; width: 2px; height: 8vh;
+  background: rgba(255, 210, 150, .40);
+}
+body[data-scene="honey-lamp"] .p3 {
+  top: 7vh; left: 18vw; width: 12vw; height: 7vh;
+  background: linear-gradient(180deg, #7a5228, #402a14);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 8px 18px rgba(255, 190, 110, .30));
+  transform-origin: 50% 0;
+  animation: sway 7s ease-in-out infinite alternate;
+}
+body[data-scene="honey-lamp"] .p4 {
+  top: 13.4vh; left: 23.2vw; width: 2.4vw; height: 2.4vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff4d6, #ffc46e 62%, transparent 72%);
+  box-shadow: 0 0 40px 12px rgba(255, 190, 100, .32);
 }
 
-/* rain — each drop falls on its own timer, so nothing loops in sync */
-.drop {
-  position: absolute;
-  top: -12vh;
-  width: 1.5px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, transparent, rgba(190, 226, 255, .55));
-  opacity: 0;
-  animation: drop-fall var(--dur, 2s) linear var(--delay, 0s) infinite;
+/* rain window — a framed window with mullions, rain on the glass */
+body[data-scene="rainy-window"] .art::before {
+  background: linear-gradient(120deg, rgba(255, 255, 255, .045), transparent 42%);
 }
-body:not([data-scene="rainy-window"]) .drop { display: none; }
 body[data-scene="rainy-window"] .art::after {
+  background: radial-gradient(ellipse 60% 45% at 50% 62%, rgba(120, 180, 220, .14), transparent 72%);
+}
+body[data-scene="rainy-window"] .p1 {
+  left: 7vw; right: 7vw; top: 11vh; bottom: 13vh;
+  border: 10px solid rgba(200, 225, 240, .30);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(30, 60, 85, .28), rgba(12, 30, 48, .42));
+  box-shadow: inset 0 0 60px rgba(8, 22, 38, .50);
+}
+body[data-scene="rainy-window"] .p2 {
+  left: 7vw; right: 7vw; top: 11vh; bottom: 13vh;
   background:
-    radial-gradient(circle at 18% 28%, rgba(205, 235, 255, .10) 0 3px, transparent 4px),
-    radial-gradient(circle at 72% 62%, rgba(205, 235, 255, .09) 0 5px, transparent 6px),
-    radial-gradient(circle at 38% 82%, rgba(205, 235, 255, .08) 0 2.5px, transparent 3.5px),
-    radial-gradient(ellipse 60% 35% at 50% 100%, rgba(140, 190, 225, .12), transparent 70%);
+    linear-gradient(90deg, transparent calc(50% - 5px), rgba(200, 225, 240, .28) calc(50% - 5px), rgba(200, 225, 240, .28) calc(50% + 5px), transparent calc(50% + 5px)),
+    linear-gradient(0deg, transparent calc(44% - 5px), rgba(200, 225, 240, .28) calc(44% - 5px), rgba(200, 225, 240, .28) calc(44% + 5px), transparent calc(44% + 5px));
+}
+body[data-scene="rainy-window"] .p3 {
+  left: 4vw; right: 4vw; bottom: 10vh; height: 2.2vh;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(215, 235, 248, .34), rgba(150, 180, 200, .10));
 }
 
-/* cocoa — two gentle wisps of steam */
+/* cocoa corner — a big mug with steam and a saucer */
 body[data-scene="cocoa-evening"] .art::before {
   background:
-    radial-gradient(ellipse 34px 110px at 28% 82%, rgba(255, 225, 195, .10), transparent 72%),
-    radial-gradient(ellipse 40px 130px at 63% 72%, rgba(255, 225, 195, .08), transparent 72%);
+    radial-gradient(ellipse 34px 110px at 26% 60%, rgba(255, 225, 195, .15), transparent 72%),
+    radial-gradient(ellipse 40px 130px at 34% 54%, rgba(255, 225, 195, .11), transparent 72%);
   filter: blur(12px);
   animation: steam 9s ease-in-out infinite alternate;
 }
 body[data-scene="cocoa-evening"] .art::after {
-  background: radial-gradient(60% 40% at 50% 100%, rgba(150, 95, 65, .12), transparent 70%);
+  inset: auto 0 0 0;
+  height: 28%;
+  background: radial-gradient(ellipse 60% 100% at 30% 100%, rgba(120, 70, 45, .30), transparent 70%);
+}
+body[data-scene="cocoa-evening"] .p1 {
+  left: 8vw; bottom: 11vh; width: 32vw; height: 5vh;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(240, 210, 180, .42), rgba(120, 75, 50, .32));
+}
+body[data-scene="cocoa-evening"] .p2 {
+  left: 31vw; bottom: 20vh; width: 10vw; height: 12vh;
+  border: 1.6vh solid #8a593c;
+  border-radius: 50%;
+  z-index: 0;
+}
+body[data-scene="cocoa-evening"] .p3 {
+  left: 11vw; bottom: 13vh; width: 22vw; height: 26vh;
+  border-radius: 8px 8px 42% 42% / 6px 6px 22% 22%;
+  background: linear-gradient(100deg, #7a4e34, #bb7d54 42%, #8a593c 76%, #5e3a27);
+  box-shadow: inset -8px 0 18px rgba(0, 0, 0, .18), 0 18px 30px rgba(0, 0, 0, .22);
+}
+body[data-scene="cocoa-evening"] .p4 {
+  left: 11vw; bottom: 36vh; width: 22vw; height: 4.5vh;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #5b3423, #2e1a12 75%);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, .45);
 }
 
-/* matcha — soft, slow clouds */
+/* matcha garden — pale sun over rolling green hills and tea rows */
 body[data-scene="matcha-cloud"] .art::before {
   background:
     radial-gradient(ellipse 180px 70px at 18% 76%, rgba(255, 255, 255, .40), transparent 72%),
-    radial-gradient(ellipse 220px 80px at 78% 62%, rgba(255, 255, 255, .32), transparent 72%),
-    radial-gradient(ellipse 160px 60px at 46% 28%, rgba(255, 255, 255, .26), transparent 72%);
+    radial-gradient(ellipse 220px 80px at 78% 62%, rgba(255, 255, 255, .32), transparent 72%);
   filter: blur(16px);
   animation: drift 22s ease-in-out infinite alternate;
 }
+body[data-scene="matcha-cloud"] .art::after {
+  inset: auto 0 0 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(90, 150, 100, .28), rgba(42, 102, 68, .55));
+  clip-path: polygon(0 58%, 20% 30%, 45% 62%, 70% 26%, 100% 56%, 100% 100%, 0 100%);
+}
+body[data-scene="matcha-cloud"] .p1 {
+  top: 12vh; right: 16vw;
+  width: min(18vh, 170px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 240, .95), rgba(232, 246, 212, .55) 65%, transparent 72%);
+  box-shadow: 0 0 60px rgba(255, 255, 220, .45);
+}
+body[data-scene="matcha-cloud"] .p2 {
+  inset: auto 0 0 0;
+  height: 25%;
+  background:
+    repeating-linear-gradient(88deg, transparent 0 22px, rgba(32, 88, 56, .32) 22px 28px, transparent 28px 52px),
+    repeating-linear-gradient(88deg, transparent 0 20px, rgba(120, 175, 125, .22) 20px 24px, transparent 24px 44px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%);
+  mask-image: linear-gradient(180deg, transparent, #000 45%);
+}
 
-/* rose — round, rosy blooms */
+/* rose bath — round blooms floating on still water */
 body[data-scene="rose-steam"] .art::before {
   background:
-    radial-gradient(circle at 20% 72%, rgba(255, 255, 255, .22) 0 22px, transparent 24px),
-    radial-gradient(circle at 78% 30%, rgba(255, 255, 255, .18) 0 28px, transparent 30px),
-    radial-gradient(circle at 52% 88%, rgba(255, 235, 240, .20) 0 34px, transparent 36px);
-  filter: blur(18px);
+    radial-gradient(circle at 22% 72%, rgba(255, 255, 255, .32) 0 22px, transparent 24px),
+    radial-gradient(circle at 74% 34%, rgba(255, 255, 255, .26) 0 30px, transparent 32px),
+    radial-gradient(circle at 50% 88%, rgba(255, 235, 240, .30) 0 38px, transparent 40px);
+  filter: blur(6px);
   animation: steam 11s ease-in-out infinite alternate;
 }
 body[data-scene="rose-steam"] .art::after {
-  background: radial-gradient(55% 35% at 50% 100%, rgba(210, 140, 160, .14), transparent 70%);
+  inset: auto 0 0 0;
+  height: 28%;
+  background: linear-gradient(180deg, transparent, rgba(190, 110, 135, .22));
 }
+body[data-scene="rose-steam"] .p1,
+body[data-scene="rose-steam"] .p2 {
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255, 220, 228, .90) 0 22%, transparent 23%),
+    radial-gradient(circle at 84% 50%, rgba(255, 225, 232, .85) 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 84%, rgba(255, 215, 225, .85) 0 22%, transparent 23%),
+    radial-gradient(circle at 16% 50%, rgba(255, 225, 232, .85) 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 50%, #c76f84 0 17%, transparent 18%);
+  filter: drop-shadow(0 10px 20px rgba(150, 70, 95, .22));
+}
+body[data-scene="rose-steam"] .p1 { left: 14vw; bottom: 14vh; width: 22vw; }
+body[data-scene="rose-steam"] .p2 { right: 16vw; bottom: 24vh; width: 14vw; opacity: .88; }
 
-/* dusk — a warm haze over low dunes */
+/* desert camp — a low sun, layered dunes, and a little tent */
 body[data-scene="cairo-dusk"] .art::before {
-  background: radial-gradient(45% 30% at 62% 74%, rgba(255, 210, 130, .16), transparent 70%);
+  background: radial-gradient(45% 30% at 62% 70%, rgba(255, 210, 130, .16), transparent 70%);
 }
 body[data-scene="cairo-dusk"] .art::after {
   inset: auto 0 0 0;
-  height: 30%;
-  background: linear-gradient(180deg, transparent, rgba(7, 26, 28, .48));
-  clip-path: polygon(0 62%, 18% 34%, 42% 66%, 68% 28%, 100% 58%, 100% 100%, 0 100%);
+  height: 34%;
+  background: linear-gradient(180deg, rgba(40, 30, 22, .20), rgba(7, 26, 28, .62));
+  clip-path: polygon(0 64%, 18% 32%, 42% 68%, 68% 26%, 100% 60%, 100% 100%, 0 100%);
+}
+body[data-scene="cairo-dusk"] .p1 {
+  right: 17vw; bottom: 23vh;
+  width: min(26vh, 240px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff0c2, #f0b35c 68%, #d98a3e);
+  box-shadow: 0 0 90px 20px rgba(255, 190, 100, .32);
+}
+body[data-scene="cairo-dusk"] .p2 {
+  left: 24vw; bottom: 11vh; width: 20vw; height: 16vh;
+  background: linear-gradient(180deg, #2b2320, #161211);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+body[data-scene="cairo-dusk"] .p3 {
+  left: 45vw; bottom: 9vh; width: 6vw; height: 6vh;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 205, 115, .90), rgba(255, 140, 60, .30) 45%, transparent 70%);
+  animation: breathe 3s ease-in-out infinite alternate;
 }
 
-/* lavender — dreamy little sparkles */
+/* lavender field — rows of stalks under a soft sun */
 body[data-scene="lavender-haze"] .art::before {
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, .42) 0 2px, transparent 3px),
-    radial-gradient(circle, rgba(150, 120, 215, .20) 0 5px, transparent 6px);
+    radial-gradient(circle, rgba(255, 255, 255, .45) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(150, 120, 215, .22) 0 5px, transparent 6px);
   background-size: 140px 140px, 210px 210px;
   background-position: 24px 32px, 96px 118px;
   animation: twinkle 8s ease-in-out infinite alternate;
 }
 body[data-scene="lavender-haze"] .art::after {
-  background: radial-gradient(60% 40% at 50% 100%, rgba(170, 150, 225, .18), transparent 70%);
+  inset: auto 0 0 0;
+  height: 36%;
+  background: linear-gradient(180deg, rgba(140, 110, 190, .16), rgba(95, 70, 150, .42));
+  clip-path: polygon(0 60%, 30% 30%, 62% 58%, 100% 28%, 100% 100%, 0 100%);
+}
+body[data-scene="lavender-haze"] .p1 {
+  inset: auto 0 0 0;
+  height: 40%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 14px, rgba(105, 75, 165, .40) 14px 17px, transparent 17px 34px),
+    repeating-linear-gradient(90deg, transparent 0 20px, rgba(135, 105, 195, .28) 20px 24px, transparent 24px 46px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 42%);
+  mask-image: linear-gradient(180deg, transparent, #000 42%);
+}
+body[data-scene="lavender-haze"] .p2 {
+  top: 14vh; left: 18vw;
+  width: min(16vh, 150px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 245, 235, .92), transparent 72%);
+  box-shadow: 0 0 50px rgba(255, 240, 225, .40);
 }
 
-/* ocean cabin — slow ripples on the water */
+/* ocean cabin — a horizon, moon reflection, and a tiny lit cabin */
 body[data-scene="ocean-cabin"] .art::before {
   inset: auto 0 0 0;
-  height: 45%;
-  background: repeating-linear-gradient(0deg, transparent 0 24px, rgba(150, 235, 235, .07) 24px 25px, transparent 25px 48px);
+  height: 46%;
+  background: repeating-linear-gradient(0deg, transparent 0 24px, rgba(150, 235, 235, .09) 24px 25px, transparent 25px 48px);
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 70%);
   mask-image: linear-gradient(180deg, transparent, #000 70%);
   animation: tide 9s ease-in-out infinite alternate;
 }
 body[data-scene="ocean-cabin"] .art::after {
-  background: radial-gradient(ellipse 50% 30% at 60% 78%, rgba(140, 225, 225, .10), transparent 70%);
+  inset: auto 0 0 0;
+  height: 46%;
+  background: linear-gradient(180deg, rgba(8, 45, 60, .24), rgba(4, 25, 38, .58));
+}
+body[data-scene="ocean-cabin"] .p1 {
+  left: 0; right: 0; top: 52%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(160, 230, 230, .38) 30%, rgba(160, 230, 230, .38) 70%, transparent);
+}
+body[data-scene="ocean-cabin"] .p2 {
+  left: 50vw; top: 53%; width: 10vw; height: 42vh;
+  background: repeating-linear-gradient(0deg, rgba(170, 235, 235, .24) 0 2px, transparent 2px 9px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  animation: shimmer 7s linear infinite;
+}
+body[data-scene="ocean-cabin"] .p3 {
+  left: 10vw; top: 40%; width: 18vw; height: 13vh;
+  background: #061e28;
+  clip-path: polygon(0 40%, 50% 0, 100% 40%, 100% 100%, 0 100%);
+}
+body[data-scene="ocean-cabin"] .p4 {
+  left: 16vw; top: 46%; width: 4vw; height: 4vh;
+  background: rgba(255, 205, 130, .80);
+  box-shadow: 0 0 24px rgba(255, 190, 110, .50);
 }
 
-/* peach terrace — warm sun spots on the wall */
+/* peach terrace — a big sun and a balcony railing */
 body[data-scene="peach-terrace"] .art::before {
   background:
-    radial-gradient(circle at 22% 30%, rgba(255, 255, 255, .42) 0 26px, transparent 28px),
-    radial-gradient(circle at 74% 66%, rgba(255, 255, 255, .34) 0 34px, transparent 36px),
-    radial-gradient(circle at 48% 84%, rgba(255, 220, 190, .30) 0 24px, transparent 26px);
+    radial-gradient(circle at 22% 30%, rgba(255, 255, 255, .34) 0 26px, transparent 28px),
+    radial-gradient(circle at 74% 66%, rgba(255, 255, 255, .28) 0 34px, transparent 36px);
   filter: blur(16px);
   animation: steam 12s ease-in-out infinite alternate;
 }
 body[data-scene="peach-terrace"] .art::after {
-  background: radial-gradient(60% 40% at 50% 100%, rgba(235, 160, 130, .16), transparent 70%);
+  inset: auto 0 0 0;
+  height: 24%;
+  background: linear-gradient(180deg, transparent, rgba(190, 110, 80, .22));
+}
+body[data-scene="peach-terrace"] .p1 {
+  top: 10vh; right: 14vw;
+  width: min(24vh, 220px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff3d8, #f6b98e 70%, transparent 72%);
+  box-shadow: 0 0 90px 18px rgba(255, 190, 140, .32);
+}
+body[data-scene="peach-terrace"] .p2 {
+  left: 0; right: 0; bottom: 18vh; height: 1.8vh;
+  background: linear-gradient(180deg, rgba(180, 110, 80, .60), rgba(150, 85, 60, .32));
+}
+body[data-scene="peach-terrace"] .p3 {
+  left: 0; right: 0; bottom: 0; height: 18vh;
+  background: repeating-linear-gradient(90deg, transparent 0 4vw, rgba(175, 105, 75, .40) 4vw 4.8vw, transparent 4.8vw 9vw);
 }
 
-/* snow lodge — quiet snowfall and a warm window */
+/* snow lodge — a snowy roofline, warm window, and falling snow */
 body[data-scene="snow-lodge"] .art::before {
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, .85) 0 2px, transparent 2.5px),
-    radial-gradient(circle, rgba(255, 255, 255, .60) 0 3px, transparent 3.5px);
+    radial-gradient(circle, rgba(255, 255, 255, .88) 0 2px, transparent 2.5px),
+    radial-gradient(circle, rgba(255, 255, 255, .62) 0 3px, transparent 3.5px);
   background-size: 110px 110px, 170px 170px;
   animation: snow 10s linear infinite;
 }
 body[data-scene="snow-lodge"] .art::after {
-  background: radial-gradient(ellipse 45% 28% at 50% 92%, rgba(245, 185, 110, .20), transparent 70%);
+  inset: auto 0 0 0;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(225, 238, 248, .78));
+  clip-path: polygon(0 62%, 22% 34%, 48% 66%, 72% 30%, 100% 58%, 100% 100%, 0 100%);
+}
+body[data-scene="snow-lodge"] .p1 {
+  right: 14vw; bottom: 16vh; width: 22vw; height: 22vh;
+  background: linear-gradient(180deg, #6b7a86, #43535f);
+  clip-path: polygon(10% 20%, 90% 20%, 100% 100%, 0 100%);
+}
+body[data-scene="snow-lodge"] .p2 {
+  right: 20vw; bottom: 22vh; width: 8vw; height: 9vh;
+  background: linear-gradient(135deg, #ffdf9a, #f0a94f);
+  box-shadow: 0 0 40px 10px rgba(255, 190, 100, .42);
+}
+body[data-scene="snow-lodge"] .p3 {
+  right: 20vw; bottom: 22vh; width: 8vw; height: 9vh;
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(80, 60, 40, .72) 48% 52%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(80, 60, 40, .72) 48% 52%, transparent 52%);
 }
 
-/* forest nook — little fireflies in the dark */
+/* forest nook — tall trees and drifting fireflies */
 body[data-scene="forest-nook"] .art::before {
   background-image:
-    radial-gradient(circle, rgba(230, 255, 170, .75) 0 2px, transparent 3px),
-    radial-gradient(circle, rgba(210, 255, 150, .50) 0 1.5px, transparent 2.5px);
+    radial-gradient(circle, rgba(230, 255, 170, .85) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(210, 255, 150, .55) 0 1.5px, transparent 2.5px);
   background-size: 150px 150px, 90px 90px;
   background-position: 30px 50px, 70px 20px;
   animation: twinkle 6s ease-in-out infinite alternate;
 }
 body[data-scene="forest-nook"] .art::after {
-  background: radial-gradient(65% 40% at 50% 100%, rgba(110, 180, 100, .12), transparent 70%);
+  inset: auto 0 0 0;
+  height: 22%;
+  background: linear-gradient(180deg, transparent, rgba(6, 30, 18, .58));
+}
+body[data-scene="forest-nook"] .p1 {
+  left: 8vw; bottom: 0; width: 4vw; height: 62vh;
+  background: linear-gradient(90deg, #081c12, #164029, #081c12);
+}
+body[data-scene="forest-nook"] .p2 {
+  left: 0; bottom: 48vh; width: 24vw; height: 42vh;
+  background: #0d2f1e;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+body[data-scene="forest-nook"] .p3 {
+  right: 10vw; bottom: 0; width: 3vw; height: 52vh;
+  background: linear-gradient(90deg, #081c12, #164029, #081c12);
+}
+body[data-scene="forest-nook"] .p4 {
+  right: 0; bottom: 44vh; width: 20vw; height: 38vh;
+  background: #0b2819;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
-/* neon alley — soft pink and blue light signs */
+/* neon alley — glowing signs above a wet, reflective street */
 body[data-scene="neon-alley"] .art::before {
-  background:
-    linear-gradient(90deg, transparent 8%, rgba(230, 120, 220, .10) 8.2%, transparent 8.6%),
-    linear-gradient(90deg, transparent 62%, rgba(120, 210, 255, .09) 62.2%, transparent 62.6%),
-    radial-gradient(ellipse 40% 60% at 78% 30%, rgba(130, 200, 255, .12), transparent 70%);
+  background: radial-gradient(ellipse 40% 60% at 78% 30%, rgba(130, 200, 255, .14), transparent 70%);
   filter: blur(3px);
   animation: twinkle 5s ease-in-out infinite alternate;
 }
 body[data-scene="neon-alley"] .art::after {
-  background: radial-gradient(55% 35% at 20% 100%, rgba(220, 100, 200, .16), transparent 70%);
+  inset: auto 0 0 0;
+  height: 26%;
+  background:
+    linear-gradient(0deg, rgba(10, 5, 18, .58), transparent),
+    repeating-linear-gradient(90deg, transparent 0 7vw, rgba(230, 130, 220, .12) 7vw 8vw, transparent 8vw 15vw);
+}
+body[data-scene="neon-alley"] .p1 {
+  inset: 0 0 26% 0;
+  background: linear-gradient(90deg, rgba(40, 15, 55, .62), transparent 30%, transparent 70%, rgba(20, 15, 45, .62));
+}
+body[data-scene="neon-alley"] .p2 {
+  left: 12vw; top: 22vh; width: 10vw; height: 34vh;
+  border: 3px solid rgba(255, 140, 220, .88);
+  border-radius: 10px;
+  box-shadow: 0 0 24px rgba(255, 110, 210, .68), inset 0 0 18px rgba(255, 110, 210, .32);
+  animation: flicker 6s infinite;
+}
+body[data-scene="neon-alley"] .p3 {
+  right: 16vw; top: 16vh; width: 16vw; height: 8vh;
+  border: 3px solid rgba(130, 215, 255, .88);
+  border-radius: 10px;
+  box-shadow: 0 0 24px rgba(100, 190, 255, .68), inset 0 0 18px rgba(100, 190, 255, .32);
+  animation: flicker 8s infinite reverse;
 }
 
-/* sunlit attic — a soft sunbeam full of dust */
+/* sunlit attic — a window throws a dusty beam across the floor */
 body[data-scene="sunlit-attic"] .art::before {
-  background:
-    linear-gradient(115deg, transparent 18%, rgba(255, 245, 200, .42) 22%, transparent 34%),
-    linear-gradient(115deg, transparent 48%, rgba(255, 245, 200, .30) 52%, transparent 62%);
-  filter: blur(8px);
-  animation: steam 14s ease-in-out infinite alternate;
-}
-body[data-scene="sunlit-attic"] .art::after {
   background-image:
-    radial-gradient(circle, rgba(180, 140, 70, .22) 0 2px, transparent 3px),
-    radial-gradient(circle, rgba(180, 140, 70, .16) 0 1.5px, transparent 2.5px);
+    radial-gradient(circle, rgba(180, 140, 70, .24) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(180, 140, 70, .18) 0 1.5px, transparent 2.5px);
   background-size: 120px 120px, 190px 190px;
   background-position: 30px 40px, 90px 110px;
   animation: twinkle 9s ease-in-out infinite alternate;
+}
+body[data-scene="sunlit-attic"] .art::after {
+  inset: auto 0 0 0;
+  height: 24%;
+  background: linear-gradient(180deg, rgba(190, 145, 70, .10), rgba(150, 105, 45, .30));
+}
+body[data-scene="sunlit-attic"] .p1 {
+  left: 12vw; top: 36vh; width: 46vw; height: 70vh;
+  background: linear-gradient(180deg, rgba(255, 240, 190, .48), rgba(255, 235, 170, .06));
+  clip-path: polygon(18% 0, 42% 0, 100% 100%, 0 100%);
+  filter: blur(6px);
+  animation: steam 14s ease-in-out infinite alternate;
+}
+body[data-scene="sunlit-attic"] .p2 {
+  left: 10vw; top: 10vh; width: 18vw; height: 30vh;
+  border: 8px solid rgba(150, 110, 60, .58);
+  border-radius: 4px;
+  background: linear-gradient(160deg, rgba(255, 250, 220, .88), rgba(255, 235, 175, .58));
+  box-shadow: 0 0 40px rgba(255, 225, 150, .42);
+}
+body[data-scene="sunlit-attic"] .p3 {
+  left: 10vw; top: 10vh; width: 18vw; height: 30vh;
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(150, 110, 60, .58) 48% 52%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(150, 110, 60, .58) 48% 52%, transparent 52%);
 }
 
 /* ============================================================
@@ -817,7 +1105,13 @@ footer {
 </style>
 </head>
 <body data-scene="midnight-mint">
-  <div class="sky" aria-hidden="true"><div class="glow"></div><div class="art"></div></div>
+  <div class="sky" aria-hidden="true">
+    <div class="glow"></div>
+    <div class="art">
+      <i class="piece p1"></i><i class="piece p2"></i><i class="piece p3"></i>
+      <i class="piece p4"></i><i class="piece p5"></i><i class="piece p6"></i>
+    </div>
+  </div>
 
   <div class="app">
     <header class="top">
