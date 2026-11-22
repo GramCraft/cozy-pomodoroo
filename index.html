@@ -1096,6 +1096,31 @@ footer {
 .switch[aria-checked="true"] { background: var(--accent); }
 .switch[aria-checked="true"]::after { transform: translateX(19px); background: var(--on-accent); }
 
+.segment {
+  display: inline-flex;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 4px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+}
+.segment button {
+  padding: 8px 13px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .25s, color .25s;
+}
+.segment button:hover { color: var(--ink); }
+.segment button.active { background: var(--accent); color: var(--on-accent); }
+
 .toast {
   position: fixed;
   left: 50%;
@@ -1120,6 +1145,9 @@ footer {
 
 @media (max-width: 560px) {
   .scene-grid { grid-template-columns: 1fr; }
+  .row { flex-wrap: wrap; }
+  .segment { width: 100%; }
+  .segment button { flex: 1; }
   .mode { padding: 10px 14px; font-size: .74rem; }
   .shortcut { display: none; }
   .timer { width: clamp(240px, 48vh, 360px); }
@@ -1240,8 +1268,11 @@ footer {
           <input id="cycle-count" type="number" min="1" max="12" />
         </div>
         <div class="row">
-          <span class="label">ring shape<span class="sub" id="ring-sub">circle</span></span>
-          <button id="ring-toggle" class="switch" type="button" role="switch" aria-checked="false" aria-label="Rounded square ring on or off"></button>
+          <span class="label">ring shape<span class="sub">the frame around the timer</span></span>
+          <div class="segment" role="group" aria-label="Ring shape">
+            <button type="button" data-ring-shape="circle" class="active" aria-pressed="true">circle</button>
+            <button type="button" data-ring-shape="square" aria-pressed="false">rounded square</button>
+          </div>
         </div>
         <div class="row">
           <span class="label">chime<span class="sub">soft sound when a session ends</span></span>
@@ -1327,8 +1358,7 @@ const el = {
   cycleCount: document.getElementById("cycle-count"),
   sound: document.getElementById("sound-toggle"),
   auto: document.getElementById("auto-toggle"),
-  ringToggle: document.getElementById("ring-toggle"),
-  ringSub: document.getElementById("ring-sub"),
+  ringButtons: [...document.querySelectorAll("[data-ring-shape]")],
 };
 
 function clamp(value, fallback, min, max) {
@@ -1577,6 +1607,14 @@ function showToast(message) {
   toastTimer = setTimeout(() => el.toast.classList.remove("show"), 3200);
 }
 
+function syncRingButtons() {
+  el.ringButtons.forEach(button => {
+    const active = button.dataset.ringShape === state.ringShape;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
 function openSettings() {
   el.focusMin.value = state.durations.focus / 60;
   el.shortMin.value = state.durations.short / 60;
@@ -1584,8 +1622,7 @@ function openSettings() {
   el.cycleCount.value = state.beforeLong;
   el.sound.setAttribute("aria-checked", String(state.sound));
   el.auto.setAttribute("aria-checked", String(state.auto));
-  el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
-  el.ringSub.textContent = state.ringShape === "square" ? "rounded square" : "circle";
+  syncRingButtons();
   el.backdrop.hidden = false;
   el.closeSettings.focus();
 }
@@ -1619,7 +1656,7 @@ buildRain();
 buildScenes();
 applyScene(state.scene);
 el.body.dataset.ring = state.ringShape;
-el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
+syncRingButtons();
 el.task.value = saved.task || "";
 state.remaining = state.durations.focus;
 buildPips();
@@ -1652,14 +1689,13 @@ el.auto.addEventListener("click", () => {
   el.auto.setAttribute("aria-checked", String(state.auto));
   persist();
 });
-el.ringToggle.addEventListener("click", () => {
-  state.ringShape = state.ringShape === "square" ? "circle" : "square";
+el.ringButtons.forEach(button => button.addEventListener("click", () => {
+  state.ringShape = button.dataset.ringShape;
   el.body.dataset.ring = state.ringShape;
-  el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
-  el.ringSub.textContent = state.ringShape === "square" ? "rounded square" : "circle";
+  syncRingButtons();
   persist();
   render();
-});
+}));
 
 function toggleFocus() {
   closeSettings();
