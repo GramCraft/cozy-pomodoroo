@@ -96,9 +96,9 @@ body {
   from { opacity: .28; }
   to   { opacity: .70; }
 }
-@keyframes rain {
-  from { background-position: 0 0; }
-  to   { background-position: -60px 200px; }
+@keyframes rain-fall {
+  from { transform: translateY(0); }
+  to   { transform: translateY(149px); }
 }
 @keyframes steam {
   from { opacity: .40; transform: translateY(8px) scale(1); }
@@ -132,14 +132,19 @@ body[data-scene="honey-lamp"] .art::after {
   background: conic-gradient(from 195deg at 12% 92%, transparent 0deg, rgba(255, 190, 110, .10) 26deg, transparent 52deg);
 }
 
-/* Rainy Window — little streaks sliding down the glass */
+/* Rainy Window — soft streaks falling down the glass, with a few droplets */
 body[data-scene="rainy-window"] .art::before {
-  background-image: repeating-linear-gradient(108deg, transparent 0 21px, rgba(190, 226, 255, .11) 21px 23px, transparent 23px 46px);
-  background-size: 200px 200px;
-  animation: rain 1.8s linear infinite;
+  inset: -160px 0;
+  background-image: repeating-linear-gradient(108deg, transparent 0 21px, rgba(190, 226, 255, .09) 21px 23px, transparent 23px 46px);
+  filter: blur(.6px);
+  animation: rain-fall 2.4s linear infinite;
 }
 body[data-scene="rainy-window"] .art::after {
-  background: radial-gradient(ellipse 60% 35% at 50% 100%, rgba(140, 190, 225, .12), transparent 70%);
+  background:
+    radial-gradient(circle at 18% 28%, rgba(205, 235, 255, .10) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 62%, rgba(205, 235, 255, .09) 0 5px, transparent 6px),
+    radial-gradient(circle at 38% 82%, rgba(205, 235, 255, .08) 0 2.5px, transparent 3.5px),
+    radial-gradient(ellipse 60% 35% at 50% 100%, rgba(140, 190, 225, .12), transparent 70%);
 }
 
 /* Cocoa Evening — two gentle wisps of steam */
