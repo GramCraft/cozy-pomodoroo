@@ -1006,6 +1006,34 @@ footer {
   color: var(--muted);
 }
 
+.presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+}
+.presets button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .25s, background .25s, transform .25s var(--ease);
+}
+.presets button:hover { transform: translateY(-2px); border-color: var(--accent); }
+.presets button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--chip));
+}
+.presets strong { font-size: .82rem; font-weight: 700; }
+.presets span { font-size: .68rem; font-weight: 600; color: var(--muted); }
+
 .scenes-sheet .scene-grid { margin-top: 20px; }
 .scene-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .scene-option {
@@ -1249,6 +1277,14 @@ footer {
         <button id="close-settings" class="icon-btn" type="button" aria-label="Close settings">×</button>
       </div>
 
+      <span class="group-label">quick presets</span>
+      <div class="presets" role="group" aria-label="Duration presets">
+        <button type="button" data-preset="classic"><strong>classic</strong><span>25 · 5 · 15</span></button>
+        <button type="button" data-preset="deep"><strong>deep</strong><span>50 · 10 · 30</span></button>
+        <button type="button" data-preset="light"><strong>light</strong><span>15 · 3 · 10</span></button>
+        <button type="button" data-preset="long-flow"><strong>long flow</strong><span>45 · 15 · 60</span></button>
+      </div>
+
       <span class="group-label">timer &amp; rhythm</span>
       <div class="rows">
         <div class="row">
@@ -1323,6 +1359,13 @@ const SCENES = [
   { id: "sunlit-attic",  name: "sunlit attic",   swatch: "#d9a441", preview: "linear-gradient(135deg, #fbf3d9, #f6dfa4 55%, #d9a441)", hint: "dust in a sunbeam" },
 ];
 
+const PRESETS = {
+  "classic":   { focus: 25, short: 5,  long: 15 },
+  "deep":      { focus: 50, short: 10, long: 30 },
+  "light":     { focus: 15, short: 3,  long: 10 },
+  "long-flow": { focus: 45, short: 15, long: 60 },
+};
+
 const STORE_KEY = "cozy-pomodoro-v1";
 function ringLength() {
   const r = state.ringShape === "square" ? 88 : 182;
@@ -1359,6 +1402,7 @@ const el = {
   sound: document.getElementById("sound-toggle"),
   auto: document.getElementById("auto-toggle"),
   ringButtons: [...document.querySelectorAll("[data-ring-shape]")],
+  presets: [...document.querySelectorAll("[data-preset]")],
 };
 
 function clamp(value, fallback, min, max) {
@@ -1628,6 +1672,32 @@ function syncRingButtons() {
   });
 }
 
+function syncPresets() {
+  el.presets.forEach(button => {
+    const p = PRESETS[button.dataset.preset];
+    const active = p && ["focus", "short", "long"].every(mode => state.durations[mode] === p[mode] * 60);
+    button.classList.toggle("active", !!active);
+    button.setAttribute("aria-pressed", String(!!active));
+  });
+}
+
+function applyPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  state.durations = { focus: p.focus * 60, short: p.short * 60, long: p.long * 60 };
+  el.focusMin.value = p.focus;
+  el.shortMin.value = p.short;
+  el.longMin.value = p.long;
+  setMode(state.mode);
+  persist();
+  syncPresets();
+  showToast(buttonLabel(key) + " preset ✨");
+}
+
+function buttonLabel(key) {
+  return el.presets.find(button => button.dataset.preset === key)?.querySelector("strong").textContent || key;
+}
+
 function openSettings() {
   el.focusMin.value = state.durations.focus / 60;
   el.shortMin.value = state.durations.short / 60;
@@ -1636,6 +1706,7 @@ function openSettings() {
   el.sound.setAttribute("aria-checked", String(state.sound));
   el.auto.setAttribute("aria-checked", String(state.auto));
   syncRingButtons();
+  syncPresets();
   el.backdrop.hidden = false;
   el.closeSettings.focus();
 }
@@ -1658,6 +1729,7 @@ function saveSettings() {
   state.beforeLong = clamp(el.cycleCount.value, 4, 1, 12);
   buildPips();
   setMode(state.mode);
+  syncPresets();
   persist();
   closeSettings();
   showToast("settings saved ✨");
@@ -1670,6 +1742,7 @@ buildScenes();
 applyScene(state.scene);
 el.body.dataset.ring = state.ringShape;
 syncRingButtons();
+syncPresets();
 el.task.value = saved.task || "";
 state.remaining = state.durations.focus;
 buildPips();
@@ -1709,6 +1782,7 @@ el.ringButtons.forEach(button => button.addEventListener("click", () => {
   persist();
   render();
 }));
+el.presets.forEach(button => button.addEventListener("click", () => applyPreset(button.dataset.preset)));
 
 function unlockOnce() {
   unlockAudio();
