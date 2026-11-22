@@ -624,7 +624,7 @@ footer {
         <button id="close-settings" class="icon-btn" type="button" aria-label="Close settings">×</button>
       </div>
 
-      <span class="group-label">session lengths · minutes</span>
+      <span class="group-label">timer &amp; rhythm</span>
       <div class="rows">
         <div class="row">
           <span class="label">focus<span class="sub">deep work time</span></span>
@@ -637,6 +637,10 @@ footer {
         <div class="row">
           <span class="label">long break<span class="sub">step away properly</span></span>
           <input id="long-min" type="number" min="1" max="90" />
+        </div>
+        <div class="row">
+          <span class="label">pomodoros before long break<span class="sub">the dots below follow this number</span></span>
+          <input id="cycle-count" type="number" min="1" max="12" />
         </div>
         <div class="row">
           <span class="label">chime<span class="sub">soft sound when a session ends</span></span>
@@ -707,6 +711,7 @@ const el = {
   focusMin: document.getElementById("focus-min"),
   shortMin: document.getElementById("short-min"),
   longMin: document.getElementById("long-min"),
+  cycleCount: document.getElementById("cycle-count"),
   sound: document.getElementById("sound-toggle"),
   auto: document.getElementById("auto-toggle"),
 };
@@ -729,6 +734,7 @@ const state = {
     long: clamp(saved.durations?.long, 15, 1, 90) * 60,
   },
   completed: Math.max(0, saved.completed || 0),
+  beforeLong: clamp(saved.beforeLong, 4, 1, 12),
   sound: saved.sound !== false,
   auto: saved.auto === true,
   mode: "focus",
@@ -744,6 +750,7 @@ function persist() {
     localStorage.setItem(STORE_KEY, JSON.stringify({
       scene: state.scene,
       completed: state.completed,
+      beforeLong: state.beforeLong,
       sound: state.sound,
       auto: state.auto,
       durations: {
@@ -830,8 +837,10 @@ function render() {
     button.setAttribute("aria-selected", String(active));
   });
 
-  const filled = state.completed % 4 || (state.completed ? 4 : 0);
+  const inCycle = state.completed % state.beforeLong;
+  const filled = inCycle || (state.completed ? state.beforeLong : 0);
   [...el.pips.children].forEach((pip, i) => pip.classList.toggle("done", i < filled));
+  el.pips.setAttribute("aria-label", filled + " of " + state.beforeLong + " focus sessions done");
   document.title = time + " · " + state.mode + " — cozy pomodoro";
 }
 
@@ -874,20 +883,25 @@ function setMode(mode) {
 
 function finish(countSession = true) {
   const wasFocus = state.mode === "focus";
+  const wasLong = state.mode === "long";
   let next = "focus";
   if (wasFocus) {
     if (countSession) {
       state.completed += 1;
-      persist();
-      next = state.completed % 4 === 0 ? "long" : "short";
+      next = state.completed % state.beforeLong === 0 ? "long" : "short";
     } else {
       next = "short";
     }
+    persist();
+  } else if (wasLong) {
+    state.completed = 0;
+    persist();
   }
   chime(wasFocus);
   setMode(next);
   if (state.auto) start();
-  showToast(wasFocus ? "nice work — take a breath ☕" : "break over, ready when you are");
+  showToast(wasFocus ? "nice work — take a breath ☕"
+    : (wasLong ? "fresh round, go gentle 🌱" : "break over, ready when you are"));
 }
 
 function skip() { finish(false); }
@@ -936,6 +950,7 @@ function openSettings() {
   el.focusMin.value = state.durations.focus / 60;
   el.shortMin.value = state.durations.short / 60;
   el.longMin.value = state.durations.long / 60;
+  el.cycleCount.value = state.beforeLong;
   el.sound.setAttribute("aria-checked", String(state.sound));
   el.auto.setAttribute("aria-checked", String(state.auto));
   el.backdrop.hidden = false;
@@ -944,10 +959,21 @@ function openSettings() {
 
 function closeSettings() { el.backdrop.hidden = true; }
 
+function buildPips() {
+  el.pips.innerHTML = "";
+  for (let i = 0; i < state.beforeLong; i++) {
+    const pip = document.createElement("span");
+    pip.className = "pip";
+    el.pips.appendChild(pip);
+  }
+}
+
 function saveSettings() {
   state.durations.focus = clamp(el.focusMin.value, 25, 1, 120) * 60;
   state.durations.short = clamp(el.shortMin.value, 5, 1, 60) * 60;
   state.durations.long = clamp(el.longMin.value, 15, 1, 90) * 60;
+  state.beforeLong = clamp(el.cycleCount.value, 4, 1, 12);
+  buildPips();
   setMode(state.mode);
   persist();
   closeSettings();
@@ -960,11 +986,7 @@ buildScenes();
 applyScene(state.scene);
 el.task.value = saved.task || "";
 state.remaining = state.durations.focus;
-for (let i = 0; i < 4; i++) {
-  const pip = document.createElement("span");
-  pip.className = "pip";
-  el.pips.appendChild(pip);
-}
+buildPips();
 render();
 
 el.start.addEventListener("click", toggle);
