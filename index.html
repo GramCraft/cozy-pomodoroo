@@ -1047,6 +1047,12 @@ footer {
 }
 .presets strong { font-size: .82rem; font-weight: 700; }
 .presets span { font-size: .68rem; font-weight: 600; color: var(--muted); }
+.presets-hint {
+  display: block;
+  margin: -5px 0 12px;
+  font-size: .64rem;
+  color: var(--muted);
+}
 
 .scenes-sheet .scene-grid { margin-top: 20px; }
 .scene-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -1296,11 +1302,12 @@ footer {
       </div>
 
       <span class="group-label">quick presets</span>
-      <div class="presets" role="group" aria-label="Duration presets">
-        <button type="button" data-preset="classic"><strong>classic</strong><span>25 · 5 · 15</span></button>
-        <button type="button" data-preset="deep"><strong>deep</strong><span>50 · 10 · 30</span></button>
-        <button type="button" data-preset="light"><strong>light</strong><span>15 · 3 · 10</span></button>
-        <button type="button" data-preset="long-flow"><strong>long flow</strong><span>45 · 15 · 60</span></button>
+      <span class="presets-hint">focus · short · long · pomodoros before long break</span>
+      <div class="presets" role="group" aria-label="Timer presets">
+        <button type="button" data-preset="classic" title="25 focus · 5 short · 15 long · 4 pomodoros"><strong>classic</strong><span>25 · 5 · 15 · 4</span></button>
+        <button type="button" data-preset="deep" title="50 focus · 10 short · 30 long · 3 pomodoros"><strong>deep</strong><span>50 · 10 · 30 · 3</span></button>
+        <button type="button" data-preset="light" title="15 focus · 3 short · 10 long · 6 pomodoros"><strong>light</strong><span>15 · 3 · 10 · 6</span></button>
+        <button type="button" data-preset="long-flow" title="45 focus · 15 short · 60 long · 3 pomodoros"><strong>long flow</strong><span>45 · 15 · 60 · 3</span></button>
       </div>
 
       <span class="group-label">timer &amp; rhythm</span>
@@ -1378,10 +1385,10 @@ const SCENES = [
 ];
 
 const PRESETS = {
-  "classic":   { focus: 25, short: 5,  long: 15 },
-  "deep":      { focus: 50, short: 10, long: 30 },
-  "light":     { focus: 15, short: 3,  long: 10 },
-  "long-flow": { focus: 45, short: 15, long: 60 },
+  "classic":   { focus: 25, short: 5,  long: 15, cycle: 4 },
+  "deep":      { focus: 50, short: 10, long: 30, cycle: 3 },
+  "light":     { focus: 15, short: 3,  long: 10, cycle: 6 },
+  "long-flow": { focus: 45, short: 15, long: 60, cycle: 3 },
 };
 
 const STORE_KEY = "cozy-pomodoro-v1";
@@ -1693,7 +1700,8 @@ function syncRingButtons() {
 function syncPresets() {
   el.presets.forEach(button => {
     const p = PRESETS[button.dataset.preset];
-    const active = p && ["focus", "short", "long"].every(mode => state.durations[mode] === p[mode] * 60);
+    const active = p && ["focus", "short", "long"].every(mode => state.durations[mode] === p[mode] * 60)
+      && state.beforeLong === p.cycle;
     button.classList.toggle("active", !!active);
     button.setAttribute("aria-pressed", String(!!active));
   });
@@ -1703,9 +1711,12 @@ function applyPreset(key) {
   const p = PRESETS[key];
   if (!p) return;
   state.durations = { focus: p.focus * 60, short: p.short * 60, long: p.long * 60 };
+  state.beforeLong = p.cycle;
   el.focusMin.value = p.focus;
   el.shortMin.value = p.short;
   el.longMin.value = p.long;
+  el.cycleCount.value = p.cycle;
+  buildPips();
   setMode(state.mode);
   persist();
   syncPresets();
