@@ -96,9 +96,11 @@ body {
   from { opacity: .28; }
   to   { opacity: .70; }
 }
-@keyframes rain-fall {
-  from { transform: translateY(0); }
-  to   { transform: translateY(149px); }
+@keyframes drop-fall {
+  0%   { transform: translateY(-6vh); opacity: 0; }
+  15%  { opacity: .7; }
+  80%  { opacity: .5; }
+  100% { transform: translateY(125vh); opacity: 0; }
 }
 @keyframes steam {
   from { opacity: .40; transform: translateY(8px) scale(1); }
@@ -132,13 +134,17 @@ body[data-scene="honey-lamp"] .art::after {
   background: conic-gradient(from 195deg at 12% 92%, transparent 0deg, rgba(255, 190, 110, .10) 26deg, transparent 52deg);
 }
 
-/* Rainy Window — soft streaks falling down the glass, with a few droplets */
-body[data-scene="rainy-window"] .art::before {
-  inset: -160px 0;
-  background-image: repeating-linear-gradient(108deg, transparent 0 21px, rgba(190, 226, 255, .09) 21px 23px, transparent 23px 46px);
-  filter: blur(.6px);
-  animation: rain-fall 2.4s linear infinite;
+/* Rainy Window — each drop falls on its own timer, so nothing loops in sync */
+.drop {
+  position: absolute;
+  top: -12vh;
+  width: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, rgba(190, 226, 255, .55));
+  opacity: 0;
+  animation: drop-fall var(--dur, 2s) linear var(--delay, 0s) infinite;
 }
+body:not([data-scene="rainy-window"]) .drop { display: none; }
 body[data-scene="rainy-window"] .art::after {
   background:
     radial-gradient(circle at 18% 28%, rgba(205, 235, 255, .10) 0 3px, transparent 4px),
@@ -804,6 +810,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 182;
 
 const el = {
   body: document.body,
+  art: document.querySelector(".art"),
   sceneGrid: document.getElementById("scene-grid"),
   scenePill: document.getElementById("scene-pill"),
   scenePillName: document.getElementById("scene-pill-name"),
@@ -877,6 +884,18 @@ function persist() {
 }
 
 /* ---------- scenes ---------- */
+
+function buildRain() {
+  for (let i = 0; i < 38; i++) {
+    const drop = document.createElement("span");
+    drop.className = "drop";
+    drop.style.left = (Math.random() * 100).toFixed(2) + "%";
+    drop.style.height = (40 + Math.random() * 60).toFixed(0) + "px";
+    drop.style.setProperty("--dur", (1.4 + Math.random() * 1.6).toFixed(2) + "s");
+    drop.style.setProperty("--delay", "-" + (Math.random() * 4).toFixed(2) + "s");
+    el.art.appendChild(drop);
+  }
+}
 
 function buildScenes() {
   el.sceneGrid.innerHTML = "";
@@ -1097,6 +1116,7 @@ function saveSettings() {
 
 /* ---------- wire it up ---------- */
 
+buildRain();
 buildScenes();
 applyScene(state.scene);
 el.task.value = saved.task || "";
