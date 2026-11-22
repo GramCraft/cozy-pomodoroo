@@ -874,7 +874,7 @@ main {
   rx: 182px;
   transition: rx .45s var(--ease);
 }
-body[data-ring="square"] .ring rect { rx: 48px; }
+body[data-ring="square"] .ring rect { rx: 88px; }
 .ring-track { stroke: var(--track); }
 .ring-progress {
   stroke: var(--accent);
@@ -1294,7 +1294,7 @@ const SCENES = [
 
 const STORE_KEY = "cozy-pomodoro-v1";
 function ringLength() {
-  const r = state.ringShape === "square" ? 48 : 182;
+  const r = state.ringShape === "square" ? 88 : 182;
   return 2 * (364 + 364) - 8 * r + 2 * Math.PI * r;
 }
 
