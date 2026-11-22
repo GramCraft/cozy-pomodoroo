@@ -415,7 +415,7 @@ footer {
 
 .group-label {
   display: block;
-  margin: 26px 0 12px;
+  margin: 14px 0 12px;
   font-size: .68rem;
   font-weight: 700;
   letter-spacing: .18em;
@@ -423,6 +423,7 @@ footer {
   color: var(--muted);
 }
 
+.scenes-sheet .scene-grid { margin-top: 20px; }
 .scene-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .scene-option {
   display: flex;
@@ -609,7 +610,7 @@ footer {
 
     <footer>
       <div class="pips" id="pips" aria-label="Completed focus sessions"></div>
-      <span class="shortcut">space = play / pause &nbsp;·&nbsp; r = reset &nbsp;·&nbsp; s = settings</span>
+      <span class="shortcut">space = play / pause &nbsp;·&nbsp; r = reset &nbsp;·&nbsp; c = scenes &nbsp;·&nbsp; s = settings</span>
     </footer>
   </div>
 
@@ -622,9 +623,6 @@ footer {
         </div>
         <button id="close-settings" class="icon-btn" type="button" aria-label="Close settings">×</button>
       </div>
-
-      <span class="group-label">scenes · pick a mood</span>
-      <div class="scene-grid" id="scene-grid" role="group" aria-label="Color scenes"></div>
 
       <span class="group-label">session lengths · minutes</span>
       <div class="rows">
@@ -651,6 +649,19 @@ footer {
       </div>
 
       <button id="save" class="primary-btn wide" type="button">save &amp; close</button>
+    </div>
+  </div>
+
+  <div class="backdrop" id="scenes-backdrop" hidden>
+    <div class="sheet scenes-sheet" role="dialog" aria-modal="true" aria-labelledby="scenes-title">
+      <div class="sheet-head">
+        <div>
+          <h2 id="scenes-title">scenes</h2>
+          <p>pick a mood for your space</p>
+        </div>
+        <button id="close-scenes" class="icon-btn" type="button" aria-label="Close scenes">×</button>
+      </div>
+      <div class="scene-grid" id="scene-grid" role="group" aria-label="Color scenes"></div>
     </div>
   </div>
 
@@ -688,6 +699,8 @@ const el = {
   pips: document.getElementById("pips"),
   toast: document.getElementById("toast"),
   backdrop: document.getElementById("backdrop"),
+  scenesBackdrop: document.getElementById("scenes-backdrop"),
+  closeScenes: document.getElementById("close-scenes"),
   settingsBtn: document.getElementById("settings-btn"),
   closeSettings: document.getElementById("close-settings"),
   save: document.getElementById("save"),
@@ -710,7 +723,6 @@ function load() {
 const saved = load();
 const state = {
   scene: SCENES.some(s => s.id === saved.scene) ? saved.scene : SCENES[0].id,
-  draftScene: SCENES.some(s => s.id === saved.scene) ? saved.scene : SCENES[0].id,
   durations: {
     focus: clamp(saved.durations?.focus, 25, 1, 120) * 60,
     short: clamp(saved.durations?.short, 5, 1, 60) * 60,
@@ -758,13 +770,12 @@ function buildScenes() {
       '<span class="txt"><span class="name">' + scene.name + '</span>' +
       '<span class="hint">' + scene.hint + '</span></span>' +
       '<span class="tick" aria-hidden="true">✓</span>';
-    option.addEventListener("click", () => selectScene(scene.id));
+    option.addEventListener("click", () => chooseScene(scene.id));
     el.sceneGrid.appendChild(option);
   });
 }
 
-function selectScene(id) {
-  state.draftScene = id;
+function highlightScene(id) {
   [...el.sceneGrid.children].forEach(option => {
     const active = option.dataset.scene === id;
     option.classList.toggle("active", active);
@@ -776,12 +787,25 @@ function applyScene(id) {
   const scene = SCENES.find(s => s.id === id);
   if (!scene) return;
   state.scene = id;
-  state.draftScene = id;
   el.body.dataset.scene = id;
   el.scenePillName.textContent = scene.name;
-  selectScene(id);
+  highlightScene(id);
   persist();
 }
+
+function chooseScene(id) {
+  applyScene(id);
+  closeScenes();
+  showToast(SCENES.find(s => s.id === id).name + " ✨");
+}
+
+function openScenes() {
+  highlightScene(state.scene);
+  el.scenesBackdrop.hidden = false;
+  el.closeScenes.focus();
+}
+
+function closeScenes() { el.scenesBackdrop.hidden = true; }
 
 /* ---------- timer ---------- */
 
@@ -912,7 +936,6 @@ function openSettings() {
   el.focusMin.value = state.durations.focus / 60;
   el.shortMin.value = state.durations.short / 60;
   el.longMin.value = state.durations.long / 60;
-  selectScene(state.scene);
   el.sound.setAttribute("aria-checked", String(state.sound));
   el.auto.setAttribute("aria-checked", String(state.auto));
   el.backdrop.hidden = false;
@@ -925,7 +948,6 @@ function saveSettings() {
   state.durations.focus = clamp(el.focusMin.value, 25, 1, 120) * 60;
   state.durations.short = clamp(el.shortMin.value, 5, 1, 60) * 60;
   state.durations.long = clamp(el.longMin.value, 15, 1, 90) * 60;
-  applyScene(state.draftScene);
   setMode(state.mode);
   persist();
   closeSettings();
@@ -955,10 +977,12 @@ el.task.addEventListener("input", () => {
 });
 
 el.settingsBtn.addEventListener("click", openSettings);
-el.scenePill.addEventListener("click", openSettings);
+el.scenePill.addEventListener("click", openScenes);
 el.closeSettings.addEventListener("click", closeSettings);
 el.save.addEventListener("click", saveSettings);
 el.backdrop.addEventListener("click", event => { if (event.target === el.backdrop) closeSettings(); });
+el.closeScenes.addEventListener("click", closeScenes);
+el.scenesBackdrop.addEventListener("click", event => { if (event.target === el.scenesBackdrop) closeScenes(); });
 el.sound.addEventListener("click", () => {
   state.sound = !state.sound;
   el.sound.setAttribute("aria-checked", String(state.sound));
@@ -972,14 +996,12 @@ el.auto.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", event => {
-  if (event.target.matches("input") || !el.backdrop.hidden) {
-    if (event.key === "Escape" && !el.backdrop.hidden) closeSettings();
-    return;
-  }
+  if (event.key === "Escape") { closeSettings(); closeScenes(); return; }
+  if (event.target.matches("input") || !el.backdrop.hidden || !el.scenesBackdrop.hidden) return;
   if (event.code === "Space") { event.preventDefault(); toggle(); }
   if (event.key.toLowerCase() === "r") { setMode(state.mode); showToast("fresh start"); }
+  if (event.key.toLowerCase() === "c") openScenes();
   if (event.key.toLowerCase() === "s") openSettings();
-  if (event.key === "Escape") closeSettings();
 });
 </script>
 </body>
