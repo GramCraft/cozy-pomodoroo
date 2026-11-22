@@ -824,12 +824,17 @@ body.focus-mode .toast {
 
 main {
   flex: 1;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
+  align-items: center;
+  padding: 14px 0;
+}
+.stage {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: clamp(14px, 2.4vh, 26px);
-  padding: 18px 0;
+  gap: clamp(12px, 2vh, 22px);
 }
 
 .modes {
@@ -939,6 +944,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  min-height: 42px;
   padding: 0 4px;
 }
 .pips { display: flex; gap: 8px; }
@@ -1184,7 +1190,7 @@ footer {
 
 @media (max-height: 700px) {
   .timer { width: clamp(220px, 48vh, 340px); }
-  main { gap: 10px; }
+  .stage { gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1229,10 +1235,12 @@ footer {
     </header>
 
     <main>
-      <div class="modes" role="tablist" aria-label="Timer mode">
-        <button class="mode active" type="button" role="tab" aria-selected="true" data-mode="focus">focus</button>
-        <button class="mode" type="button" role="tab" aria-selected="false" data-mode="short">short break</button>
-        <button class="mode" type="button" role="tab" aria-selected="false" data-mode="long">long break</button>
+      <div class="stage stage-top">
+        <div class="modes" role="tablist" aria-label="Timer mode">
+          <button class="mode active" type="button" role="tab" aria-selected="true" data-mode="focus">focus</button>
+          <button class="mode" type="button" role="tab" aria-selected="false" data-mode="short">short break</button>
+          <button class="mode" type="button" role="tab" aria-selected="false" data-mode="long">long break</button>
+        </div>
       </div>
 
       <div class="timer">
@@ -1245,19 +1253,21 @@ footer {
         </div>
       </div>
 
-      <label class="task">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-        <input id="task" type="text" maxlength="60" placeholder="what are you focusing on?" autocomplete="off" />
-      </label>
+      <div class="stage stage-bottom">
+        <label class="task">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+          <input id="task" type="text" maxlength="60" placeholder="what are you focusing on?" autocomplete="off" />
+        </label>
 
-      <div class="controls">
-        <button id="reset" class="icon-btn" type="button" aria-label="Reset timer" title="Reset">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v6h6"/></svg>
-        </button>
-        <button id="start" class="primary-btn" type="button">start focus <span aria-hidden="true">→</span></button>
-        <button id="skip" class="icon-btn" type="button" aria-label="Skip session" title="Skip">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 5 9 7-9 7V5Zm12 0v14"/></svg>
-        </button>
+        <div class="controls">
+          <button id="reset" class="icon-btn" type="button" aria-label="Reset timer" title="Reset">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v6h6"/></svg>
+          </button>
+          <button id="start" class="primary-btn" type="button">start focus <span aria-hidden="true">→</span></button>
+          <button id="skip" class="icon-btn" type="button" aria-label="Skip session" title="Skip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 5 9 7-9 7V5Zm12 0v14"/></svg>
+          </button>
+        </div>
       </div>
     </main>
 
