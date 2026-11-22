@@ -867,7 +867,14 @@ main {
   place-items: center;
 }
 .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
-.ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.ring rect {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  rx: 182px;
+  transition: rx .45s var(--ease);
+}
+body[data-ring="square"] .ring rect { rx: 48px; }
 .ring-track { stroke: var(--track); }
 .ring-progress {
   stroke: var(--accent);
@@ -1174,8 +1181,8 @@ footer {
 
       <div class="timer">
         <svg class="ring" viewBox="0 0 400 400" aria-hidden="true">
-          <circle class="ring-track" cx="200" cy="200" r="182" />
-          <circle class="ring-progress" id="ring" cx="200" cy="200" r="182" />
+          <rect class="ring-track" x="18" y="18" width="364" height="364" />
+          <rect class="ring-progress" id="ring" x="18" y="18" width="364" height="364" />
         </svg>
         <div class="timer-face">
           <span class="time" id="time">25:00</span>
@@ -1233,6 +1240,10 @@ footer {
           <input id="cycle-count" type="number" min="1" max="12" />
         </div>
         <div class="row">
+          <span class="label">ring shape<span class="sub" id="ring-sub">circle</span></span>
+          <button id="ring-toggle" class="switch" type="button" role="switch" aria-checked="false" aria-label="Rounded square ring on or off"></button>
+        </div>
+        <div class="row">
           <span class="label">chime<span class="sub">soft sound when a session ends</span></span>
           <button id="sound-toggle" class="switch" type="button" role="switch" aria-checked="true" aria-label="Chime on or off"></button>
         </div>
@@ -1282,7 +1293,10 @@ const SCENES = [
 ];
 
 const STORE_KEY = "cozy-pomodoro-v1";
-const CIRCUMFERENCE = 2 * Math.PI * 182;
+function ringLength() {
+  const r = state.ringShape === "square" ? 48 : 182;
+  return 2 * (364 + 364) - 8 * r + 2 * Math.PI * r;
+}
 
 const el = {
   body: document.body,
@@ -1313,6 +1327,8 @@ const el = {
   cycleCount: document.getElementById("cycle-count"),
   sound: document.getElementById("sound-toggle"),
   auto: document.getElementById("auto-toggle"),
+  ringToggle: document.getElementById("ring-toggle"),
+  ringSub: document.getElementById("ring-sub"),
 };
 
 function clamp(value, fallback, min, max) {
@@ -1336,6 +1352,7 @@ const state = {
   beforeLong: clamp(saved.beforeLong, 4, 1, 12),
   sound: saved.sound !== false,
   auto: saved.auto === true,
+  ringShape: saved.ringShape === "square" ? "square" : "circle",
   mode: "focus",
   remaining: 25 * 60,
   running: false,
@@ -1352,6 +1369,7 @@ function persist() {
       beforeLong: state.beforeLong,
       sound: state.sound,
       auto: state.auto,
+      ringShape: state.ringShape,
       durations: {
         focus: state.durations.focus / 60,
         short: state.durations.short / 60,
@@ -1436,8 +1454,9 @@ function formatTime(seconds) {
 function render() {
   const time = formatTime(state.remaining);
   el.time.textContent = time;
-  el.ring.style.strokeDasharray = CIRCUMFERENCE;
-  el.ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - state.remaining / state.durations[state.mode]);
+  const length = ringLength();
+  el.ring.style.strokeDasharray = length;
+  el.ring.style.strokeDashoffset = length * (1 - state.remaining / state.durations[state.mode]);
 
   const verb = state.running ? "pause" : (state.remaining < state.durations[state.mode] ? "resume" : "start");
   const what = state.mode === "focus" ? "focus" : "break";
@@ -1565,6 +1584,8 @@ function openSettings() {
   el.cycleCount.value = state.beforeLong;
   el.sound.setAttribute("aria-checked", String(state.sound));
   el.auto.setAttribute("aria-checked", String(state.auto));
+  el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
+  el.ringSub.textContent = state.ringShape === "square" ? "rounded square" : "circle";
   el.backdrop.hidden = false;
   el.closeSettings.focus();
 }
@@ -1597,6 +1618,8 @@ function saveSettings() {
 buildRain();
 buildScenes();
 applyScene(state.scene);
+el.body.dataset.ring = state.ringShape;
+el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
 el.task.value = saved.task || "";
 state.remaining = state.durations.focus;
 buildPips();
@@ -1628,6 +1651,14 @@ el.auto.addEventListener("click", () => {
   state.auto = !state.auto;
   el.auto.setAttribute("aria-checked", String(state.auto));
   persist();
+});
+el.ringToggle.addEventListener("click", () => {
+  state.ringShape = state.ringShape === "square" ? "circle" : "square";
+  el.body.dataset.ring = state.ringShape;
+  el.ringToggle.setAttribute("aria-checked", String(state.ringShape === "square"));
+  el.ringSub.textContent = state.ringShape === "square" ? "rounded square" : "circle";
+  persist();
+  render();
 });
 
 function toggleFocus() {
