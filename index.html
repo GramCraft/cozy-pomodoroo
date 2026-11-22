@@ -904,7 +904,7 @@ function finish(countSession = true) {
     : (wasLong ? "fresh round, go gentle 🌱" : "break over, ready when you are"));
 }
 
-function skip() { finish(false); }
+function skip() { finish(state.mode === "focus"); }
 
 /* ---------- tiny sounds, no audio files needed ---------- */
 
