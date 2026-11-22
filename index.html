@@ -893,6 +893,8 @@ body[data-ring="square"] .ring rect { rx: 88px; }
   letter-spacing: -.06em;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  /* center the actual glyphs, not the font box — scales with font-size */
+  transform: translate(-0.03em, -0.02em);
 }
 .task {
   display: flex;
