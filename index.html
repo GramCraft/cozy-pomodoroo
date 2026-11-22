@@ -724,7 +724,7 @@ body[data-scene="sunlit-attic"] {
    layout — the timer IS the page, not a little box inside it
    ============================================================ */
 
-.app { flex: 1; display: flex; flex-direction: column; }
+.app { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
 
 .top {
   display: flex;
@@ -791,10 +791,35 @@ body[data-scene="sunlit-attic"] {
   transition: color .25s, transform .25s var(--ease), border-color .25s;
 }
 .icon-btn:hover { color: var(--ink); transform: translateY(-2px); border-color: var(--accent); }
+.icon-btn.active { color: var(--accent); border-color: var(--accent); }
 .icon-btn svg {
   width: 19px; height: 19px;
   fill: none; stroke: currentColor;
   stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+#fullscreen-btn .collapse { display: none; }
+body.is-fullscreen #fullscreen-btn .expand { display: none; }
+body.is-fullscreen #fullscreen-btn .collapse { display: block; }
+
+/* focus mode — just the timer, on a slightly darker sky */
+.focus-shade {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(0, 0, 0, .30);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s var(--ease);
+}
+body.focus-mode .focus-shade { opacity: 1; }
+body.focus-mode .top,
+body.focus-mode .modes,
+body.focus-mode .task,
+body.focus-mode .controls,
+body.focus-mode footer,
+body.focus-mode .toast {
+  opacity: 0;
+  pointer-events: none;
 }
 
 main {
@@ -1112,6 +1137,7 @@ footer {
       <i class="piece p4"></i><i class="piece p5"></i><i class="piece p6"></i>
     </div>
   </div>
+  <div class="focus-shade" aria-hidden="true"></div>
 
   <div class="app">
     <header class="top">
@@ -1125,6 +1151,13 @@ footer {
       <div class="top-right">
         <button id="scene-pill" class="scene-pill" type="button" title="Open scene settings">
           <span class="dot" aria-hidden="true"></span><span id="scene-pill-name">mint room</span>
+        </button>
+        <button id="fullscreen-btn" class="icon-btn" type="button" aria-label="Enter fullscreen" title="Fullscreen">
+          <svg class="expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+          <svg class="collapse" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg>
+        </button>
+        <button id="focus-btn" class="icon-btn" type="button" aria-label="Enter focus mode" title="Focus mode (d)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/></svg>
         </button>
         <button id="settings-btn" class="icon-btn" type="button" aria-label="Open settings" title="Settings">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.01A1.7 1.7 0 0 0 21 10.03h.09a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6.97Z"/></svg>
@@ -1167,7 +1200,7 @@ footer {
 
     <footer>
       <div class="pips" id="pips" aria-label="Completed focus sessions"></div>
-      <span class="shortcut">space = play / pause &nbsp;·&nbsp; r = reset &nbsp;·&nbsp; c = scenes &nbsp;·&nbsp; s = settings</span>
+      <span class="shortcut">space = play / pause &nbsp;·&nbsp; r = reset &nbsp;·&nbsp; d = focus &nbsp;·&nbsp; c = scenes &nbsp;·&nbsp; s = settings</span>
     </footer>
   </div>
 
@@ -1270,6 +1303,8 @@ const el = {
   scenesBackdrop: document.getElementById("scenes-backdrop"),
   closeScenes: document.getElementById("close-scenes"),
   settingsBtn: document.getElementById("settings-btn"),
+  fullscreenBtn: document.getElementById("fullscreen-btn"),
+  focusBtn: document.getElementById("focus-btn"),
   closeSettings: document.getElementById("close-settings"),
   save: document.getElementById("save"),
   focusMin: document.getElementById("focus-min"),
@@ -1595,9 +1630,38 @@ el.auto.addEventListener("click", () => {
   persist();
 });
 
+function toggleFocus() {
+  closeSettings();
+  closeScenes();
+  const on = el.body.classList.toggle("focus-mode");
+  el.focusBtn.classList.toggle("active", on);
+  el.focusBtn.setAttribute("aria-label", on ? "Exit focus mode" : "Enter focus mode");
+  el.focusBtn.title = on ? "Exit focus mode (d)" : "Focus mode (d)";
+}
+
+el.focusBtn.addEventListener("click", toggleFocus);
+
+el.fullscreenBtn.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch {
+    showToast("fullscreen not available");
+  }
+});
+
+document.addEventListener("fullscreenchange", () => {
+  const on = !!document.fullscreenElement;
+  el.body.classList.toggle("is-fullscreen", on);
+  el.fullscreenBtn.setAttribute("aria-label", on ? "Exit fullscreen" : "Enter fullscreen");
+  el.fullscreenBtn.title = on ? "Exit fullscreen" : "Fullscreen";
+});
+
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") { closeSettings(); closeScenes(); return; }
-  if (event.target.matches("input") || !el.backdrop.hidden || !el.scenesBackdrop.hidden) return;
+  if (event.target instanceof Element && event.target.matches("input")) return;
+  if (event.key.toLowerCase() === "d") { toggleFocus(); return; }
+  if (!el.backdrop.hidden || !el.scenesBackdrop.hidden) return;
   if (event.code === "Space") { event.preventDefault(); toggle(); }
   if (event.key.toLowerCase() === "r") { setMode(state.mode); showToast("fresh start"); }
   if (event.key.toLowerCase() === "c") openScenes();
