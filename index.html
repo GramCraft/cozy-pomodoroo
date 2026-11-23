@@ -889,14 +889,12 @@ main {
   100% { stroke-width: 5; filter: drop-shadow(0 0 10px var(--glow-a)); }
 }
 .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); overflow: visible; }
-.ring rect {
+.ring path {
   fill: none;
   stroke-width: 5;
   stroke-linecap: round;
-  rx: 182px;
-  transition: rx .45s var(--ease);
+  transition: stroke .6s, d .45s var(--ease);
 }
-body[data-ring="square"] .ring rect { rx: 88px; }
 .ring-track { stroke: var(--track); }
 .ring-progress {
   stroke: var(--accent);
@@ -1271,8 +1269,8 @@ footer {
 
       <div class="timer">
         <svg class="ring" viewBox="0 0 400 400" aria-hidden="true">
-          <rect class="ring-track" x="18" y="18" width="364" height="364" />
-          <rect class="ring-progress" id="ring" x="18" y="18" width="364" height="364" />
+          <path class="ring-track" id="ring-track" />
+          <path class="ring-progress" id="ring" />
         </svg>
         <div class="timer-face">
           <span class="time" id="time">25:00</span>
@@ -1408,6 +1406,28 @@ function ringLength() {
   const r = state.ringShape === "square" ? 88 : 182;
   return 2 * (364 + 364) - 8 * r + 2 * Math.PI * r;
 }
+function ringPath() {
+  const r = state.ringShape === "square" ? 88 : 182;
+  const x0 = 18, y0 = 18, x1 = 382, y1 = 382;
+  const topMid = (x0 + x1) / 2 - 12;
+  let d = "M " + topMid + " " + y0;
+  d += " L " + (x1 - r) + " " + y0;
+  d += " A " + r + " " + r + " 0 0 1 " + x1 + " " + (y0 + r);
+  d += " L " + x1 + " " + (y1 - r);
+  d += " A " + r + " " + r + " 0 0 1 " + (x1 - r) + " " + y1;
+  d += " L " + (x0 + r) + " " + y1;
+  d += " A " + r + " " + r + " 0 0 1 " + x0 + " " + (y1 - r);
+  d += " L " + x0 + " " + (y0 + r);
+  d += " A " + r + " " + r + " 0 0 1 " + (x0 + r) + " " + y0;
+  d += " L " + topMid + " " + y0;
+  d += " Z";
+  return d;
+}
+function syncRingPath() {
+  const d = ringPath();
+  if (el.ringTrack) el.ringTrack.setAttribute("d", d);
+  if (el.ring) el.ring.setAttribute("d", d);
+}
 
 const el = {
   body: document.body,
@@ -1419,6 +1439,7 @@ const el = {
   time: document.getElementById("time"),
   timer: document.querySelector(".timer"),
   ring: document.getElementById("ring"),
+  ringTrack: document.getElementById("ring-track"),
   start: document.getElementById("start"),
   reset: document.getElementById("reset"),
   skip: document.getElementById("skip"),
@@ -1566,12 +1587,10 @@ function formatTime(seconds) {
 function render() {
   const time = formatTime(state.remaining);
   el.time.textContent = time;
+  syncRingPath();
   const length = ringLength();
-  const rx = state.ringShape === "square" ? 88 : 182;
-  const phase = (364 - 2 * rx) / 2; // top-center offset along the perimeter
-  const progress = state.remaining / state.durations[state.mode];
   el.ring.style.strokeDasharray = length;
-  el.ring.style.strokeDashoffset = (phase - length * progress + length) % length;
+  el.ring.style.strokeDashoffset = length * (1 - state.remaining / state.durations[state.mode]);
 
   const verb = state.running ? "pause" : (state.remaining < state.durations[state.mode] ? "resume" : "start");
   const what = state.mode === "focus" ? "focus" : "break";
@@ -1834,6 +1853,7 @@ el.ringButtons.forEach(button => button.addEventListener("click", () => {
   state.ringShape = button.dataset.ringShape;
   el.body.dataset.ring = state.ringShape;
   syncRingButtons();
+  syncRingPath();
   persist();
   render();
 }));
