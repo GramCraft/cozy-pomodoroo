@@ -1567,8 +1567,11 @@ function render() {
   const time = formatTime(state.remaining);
   el.time.textContent = time;
   const length = ringLength();
+  const rx = state.ringShape === "square" ? 88 : 182;
+  const phase = (364 - 2 * rx) / 2; // top-center offset along the perimeter
+  const progress = state.remaining / state.durations[state.mode];
   el.ring.style.strokeDasharray = length;
-  el.ring.style.strokeDashoffset = length * (1 - state.remaining / state.durations[state.mode]);
+  el.ring.style.strokeDashoffset = (phase - length * progress + length) % length;
 
   const verb = state.running ? "pause" : (state.remaining < state.durations[state.mode] ? "resume" : "start");
   const what = state.mode === "focus" ? "focus" : "break";
