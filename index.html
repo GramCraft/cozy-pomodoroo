@@ -1409,7 +1409,7 @@ function ringLength() {
 function ringPath() {
   const r = state.ringShape === "square" ? 88 : 182;
   const x0 = 18, y0 = 18, x1 = 382, y1 = 382;
-  const topMid = (x0 + x1) / 2 - 13;
+  const topMid = (x0 + x1) / 2;
   let d = "M " + topMid + " " + y0;
   d += " L " + (x1 - r) + " " + y0;
   d += " A " + r + " " + r + " 0 0 1 " + x1 + " " + (y0 + r);
