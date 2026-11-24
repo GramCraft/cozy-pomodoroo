@@ -812,6 +812,7 @@ body.is-fullscreen #fullscreen-btn .collapse { display: block; }
   transition: opacity .5s var(--ease);
 }
 body.focus-mode .focus-shade { opacity: 1; }
+body.focus-mode #focus-btn { position: fixed; top: 18px; right: 18px; z-index: 5; opacity: 1; pointer-events: auto; background: var(--chip); border-color: var(--line); }
 body.focus-mode .top,
 body.focus-mode .modes,
 body.focus-mode .task,
@@ -972,6 +973,7 @@ footer {
   padding: 0 4px;
 }
 .pips { display: flex; gap: 8px; }
+.timer .pips { position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%); z-index: 3; }
 .pip {
   width: 9px; height: 9px;
   border-radius: 50%;
@@ -1029,13 +1031,17 @@ footer {
 
 .group-label {
   display: block;
-  margin: 14px 0 12px;
+  margin: 22px 0 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
   font-size: .68rem;
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink);
+  opacity: .7;
 }
+.group-label:first-of-type { border-top: none; margin-top: 8px; padding-top: 0; }
 
 .presets {
   display: grid;
@@ -1218,13 +1224,13 @@ footer {
   .timer { width: clamp(240px, 48vh, 360px); }
   .primary-btn { min-width: 190px; }
 .secondary-btn {
-  min-width: 92px; height: 34px; padding: 0 14px;
+  min-width: 108px; height: 36px; padding: 0 16px;
   border: 1px solid var(--line); border-radius: 12px;
   background: var(--chip); color: var(--ink);
-  font: inherit; font-size: .78rem; font-weight: 700;
-  cursor: pointer; transition: border-color .2s, transform .2s var(--ease);
+  font: inherit; font-size: .8rem; font-weight: 700;
+  cursor: pointer; transition: border-color .2s, transform .2s var(--ease), background .2s;
 }
-.secondary-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.secondary-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--chip)); transform: translateY(-1px); }
 }
 
 @media (max-height: 700px) {
@@ -1267,6 +1273,9 @@ footer {
         <button id="focus-btn" class="icon-btn" type="button" aria-label="Enter focus mode" title="Focus mode (d)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/></svg>
         </button>
+        <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" title="Menu (shortcuts)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
         <button id="settings-btn" class="icon-btn" type="button" aria-label="Open settings" title="Settings">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.01A1.7 1.7 0 0 0 21 10.03h.09a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6.97Z"/></svg>
         </button>
@@ -1290,6 +1299,7 @@ footer {
         <div class="timer-face">
           <span class="time" id="time"><span class="mm">25</span><span class="colon">:</span><span class="ss">00</span></span>
         </div>
+        <div class="pips" id="pips" aria-label="Completed focus sessions"></div>
       </div>
 
       <div class="stage stage-bottom">
@@ -1313,7 +1323,6 @@ footer {
     <footer>
       <span class="today-stats" id="today-stats" aria-live="polite"></span>
       <div class="pips" id="pips" aria-label="Completed focus sessions"></div>
-      <span class="shortcut">space = play / pause &nbsp;·&nbsp; r = reset &nbsp;·&nbsp; d = focus &nbsp;·&nbsp; c = scenes &nbsp;·&nbsp; s = settings &nbsp;·&nbsp; ? = help</span>
     </footer>
   </div>
 
@@ -1375,12 +1384,12 @@ footer {
       <div class="rows">
         <div class="row">
           <span class="label">export<span class="sub">download your settings & stats as json</span></span>
-          <button id="export-data" class="secondary-btn" type="button">export</button>
+          <button id="export-data" class="secondary-btn" type="button">export ↓</button>
         </div>
         <div class="row">
           <span class="label">import<span class="sub">load a saved json file</span></span>
           <input id="import-file" type="file" accept="application/json" hidden />
-          <button id="import-data" class="secondary-btn" type="button">import</button>
+          <button id="import-data" class="secondary-btn" type="button">import ↑</button>
         </div>
       </div>
 
@@ -1486,6 +1495,7 @@ const el = {
   importFile: document.getElementById("import-file"),
   settingsBtn: document.getElementById("settings-btn"),
   fullscreenBtn: document.getElementById("fullscreen-btn"),
+  menuBtn: document.getElementById("menu-btn"),
   focusBtn: document.getElementById("focus-btn"),
   closeSettings: document.getElementById("close-settings"),
   save: document.getElementById("save"),
@@ -1932,6 +1942,7 @@ el.task.addEventListener("input", () => {
 });
 
 el.settingsBtn.addEventListener("click", openSettings);
+if (el.menuBtn) el.menuBtn.addEventListener("click", openHelp);
 if (el.closeHelp) el.closeHelp.addEventListener("click", closeHelp);
 if (el.helpBackdrop) el.helpBackdrop.addEventListener("click", (e) => { if (e.target === el.helpBackdrop) closeHelp(); });
 if (el.exportData) el.exportData.addEventListener("click", exportData);
