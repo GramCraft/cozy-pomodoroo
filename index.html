@@ -812,7 +812,8 @@ body.is-fullscreen #fullscreen-btn .collapse { display: block; }
   transition: opacity .5s var(--ease);
 }
 body.focus-mode .focus-shade { opacity: 1; }
-body.focus-mode #focus-btn { position: fixed; top: 18px; right: 18px; z-index: 5; opacity: 1; pointer-events: auto; background: var(--chip); border-color: var(--line); }
+.focus-exit { display: none; }
+body.focus-mode .focus-exit { display: grid; place-items: center; position: fixed; top: 18px; right: 18px; z-index: 5; background: var(--chip); border-color: var(--line); }
 body.focus-mode .top,
 body.focus-mode .modes,
 body.focus-mode .task,
@@ -973,7 +974,7 @@ footer {
   padding: 0 4px;
 }
 .pips { display: flex; gap: 8px; }
-.timer .pips { position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%); z-index: 3; }
+.timer .pips { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); z-index: 3; }
 .pip {
   width: 9px; height: 9px;
   border-radius: 50%;
@@ -1031,17 +1032,25 @@ footer {
 
 .group-label {
   display: block;
-  margin: 22px 0 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  font-size: .68rem;
+  margin: 24px 0 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--chip));
+  border: 1px solid var(--line);
+  font-size: .7rem;
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--ink);
-  opacity: .7;
+  color: var(--accent);
 }
-.group-label:first-of-type { border-top: none; margin-top: 8px; padding-top: 0; }
+.group-label:first-of-type { margin-top: 8px; }
+.rows {
+  background: var(--chip);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+}
 
 .presets {
   display: grid;
@@ -1225,12 +1234,14 @@ footer {
   .primary-btn { min-width: 190px; }
 .secondary-btn {
   min-width: 108px; height: 36px; padding: 0 16px;
-  border: 1px solid var(--line); border-radius: 12px;
-  background: var(--chip); color: var(--ink);
+  border: 0; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--on-accent);
   font: inherit; font-size: .8rem; font-weight: 700;
-  cursor: pointer; transition: border-color .2s, transform .2s var(--ease), background .2s;
+  cursor: pointer; box-shadow: 0 8px 20px var(--glow-a);
+  transition: transform .2s var(--ease), filter .2s;
 }
-.secondary-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--chip)); transform: translateY(-1px); }
+.secondary-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
 }
 
 @media (max-height: 700px) {
@@ -1273,7 +1284,7 @@ footer {
         <button id="focus-btn" class="icon-btn" type="button" aria-label="Enter focus mode" title="Focus mode (d)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/></svg>
         </button>
-        <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" title="Menu (shortcuts)">
+        <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" title="Menu (shortcuts)" onclick="openHelp()">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <button id="settings-btn" class="icon-btn" type="button" aria-label="Open settings" title="Settings">
@@ -1875,12 +1886,12 @@ function buttonLabel(key) {
 }
 
 function openHelp() {
-  if (!el.helpBackdrop) return;
-  el.helpBackdrop.hidden = false;
+  const b = document.getElementById("help-backdrop");
+  if (b) b.hidden = false;
 }
 function closeHelp() {
-  if (!el.helpBackdrop) return;
-  el.helpBackdrop.hidden = true;
+  const b = document.getElementById("help-backdrop");
+  if (b) b.hidden = true;
 }
 function openSettings() {
   el.focusMin.value = state.durations.focus / 60;
@@ -2027,14 +2038,18 @@ document.addEventListener("keydown", event => {
 });
 </script>
 
-<div class="backdrop" id="help-backdrop" hidden>
+<button id="exit-focus" class="icon-btn focus-exit" type="button" aria-label="Exit focus mode" title="Exit focus mode (d)" onclick="toggleFocus()">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
+
+<div class="backdrop" id="help-backdrop" hidden onclick="if(event.target===this)closeHelp()">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <div class="sheet-head">
       <div>
         <h2 id="help-title">shortcuts</h2>
         <p>keyboard friends</p>
       </div>
-      <button id="close-help" class="icon-btn" type="button" aria-label="Close help">×</button>
+      <button id="close-help" class="icon-btn" type="button" aria-label="Close help" onclick="closeHelp()">×</button>
     </div>
     <div class="rows">
       <div class="row"><span class="label">space<span class="sub">play / pause</span></span></div>
