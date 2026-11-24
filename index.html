@@ -1283,7 +1283,7 @@ footer {
 }
 </style>
 </head>
-<body data-scene="midnight-mint">
+<body data-scene="cairo-dusk">
   <div class="sky" aria-hidden="true">
     <div class="glow"></div>
     <div class="art">
@@ -1304,7 +1304,7 @@ footer {
       </div>
       <div class="top-right">
         <button id="scene-pill" class="scene-pill" type="button" title="Open scene settings">
-          <span class="dot" aria-hidden="true"></span><span id="scene-pill-name">mint room</span>
+          <span class="dot" aria-hidden="true"></span><span id="scene-pill-name">desert camp</span>
         </button>
         <button id="fullscreen-btn" class="icon-btn" type="button" aria-label="Enter fullscreen" title="Fullscreen">
           <svg class="expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
@@ -1561,7 +1561,7 @@ function todayKey() { return new Date().toISOString().slice(0, 10); }
 
 const saved = load();
 const state = {
-  scene: SCENES.some(s => s.id === saved.scene) ? saved.scene : SCENES[0].id,
+  scene: SCENES.some(s => s.id === saved.scene) ? saved.scene : "cairo-dusk",
   durations: {
     focus: clamp(saved.durations?.focus, 25, 1, 120) * 60,
     short: clamp(saved.durations?.short, 5, 1, 60) * 60,
