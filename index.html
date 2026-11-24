@@ -972,6 +972,7 @@ main {
 .primary-btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
 .primary-btn:active { transform: translateY(1px); }
 .primary-btn.wide { width: 100%; min-width: 0; margin-top: 22px; }
+.primary-btn.compact { min-width: 0; padding: 10px 18px; font-size: .85rem; box-shadow: 0 8px 20px var(--glow-a); }
 
 footer {
   display: flex;
@@ -1278,7 +1279,7 @@ footer {
         <span class="brand-mark" aria-hidden="true"></span>
         <div>
           <h1>cozy pomodoro</h1>
-          <p>gram!! plz study/work</p>
+          <p>let's get cozy &amp; productive ✨</p>
         </div>
       </div>
       <div class="top-right">
@@ -1403,12 +1404,12 @@ footer {
       <div class="rows">
         <div class="row">
           <span class="label">export<span class="sub">download your settings & stats as json</span></span>
-          <button id="export-data" class="secondary-btn" type="button">export ↓</button>
+          <button id="export-data" class="primary-btn compact" type="button">export ↓</button>
         </div>
         <div class="row">
           <span class="label">import<span class="sub">load a saved json file</span></span>
           <input id="import-file" type="file" accept="application/json" hidden />
-          <button id="import-data" class="secondary-btn" type="button">import ↑</button>
+          <button id="import-data" class="primary-btn compact" type="button">import ↑</button>
         </div>
       </div>
 
