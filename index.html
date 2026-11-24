@@ -811,6 +811,14 @@ body.is-fullscreen #fullscreen-btn .collapse { display: block; }
   pointer-events: none;
   transition: opacity .5s var(--ease);
 }
+body[data-scene="matcha-cloud"] .focus-shade,
+body[data-scene="rose-steam"] .focus-shade,
+body[data-scene="lavender-haze"] .focus-shade,
+body[data-scene="peach-terrace"] .focus-shade,
+body[data-scene="snow-lodge"] .focus-shade,
+body[data-scene="sunlit-attic"] .focus-shade {
+  background: rgba(0, 0, 0, .12);
+}
 body.focus-mode .focus-shade { opacity: 1; }
 .focus-exit { display: none; }
 body.focus-mode .focus-exit { display: grid; place-items: center; position: fixed; top: 18px; right: 18px; z-index: 5; background: var(--chip); border-color: var(--line); }
