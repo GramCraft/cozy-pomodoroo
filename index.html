@@ -1241,6 +1241,9 @@ footer {
   .shortcut { display: none; }
   .timer { width: clamp(240px, 48vh, 360px); }
   .primary-btn { min-width: 190px; }
+  .secondary-btn { min-width: 96px; height: 34px; font-size: .75rem; }
+}
+
 .secondary-btn {
   min-width: 108px; height: 36px; padding: 0 16px;
   border: 0; border-radius: 12px;
@@ -1251,11 +1254,28 @@ footer {
   transition: transform .2s var(--ease), filter .2s;
 }
 .secondary-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
-}
 
 @media (max-height: 700px) {
   .timer { width: clamp(220px, 48vh, 340px); }
   .stage { gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  body { padding: 12px 14px; }
+  .top { flex-wrap: wrap; gap: 10px; }
+  .brand h1 { font-size: 1.1rem; }
+  .scene-pill { font-size: .72rem; padding: 6px 10px; }
+  .modes { flex-wrap: wrap; justify-content: center; }
+  .mode { padding: 8px 12px; font-size: .7rem; }
+  .timer { width: clamp(200px, 62vw, 320px); }
+  .time { font-size: clamp(3.2rem, 11vw, 5rem); }
+  .task { width: 100%; }
+  .controls { flex-wrap: wrap; justify-content: center; }
+  .primary-btn { min-width: 160px; padding: 12px 20px; font-size: .9rem; }
+  .sheet { width: 100%; max-height: 92vh; }
+  .presets { grid-template-columns: 1fr; }
+  footer { flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .today-stats { font-size: .68rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
