@@ -1389,7 +1389,7 @@ footer {
       <div class="rows">
         <div class="row">
           <span class="label">focus<span class="sub">deep work time</span></span>
-          <input id="focus-min" type="number" min="1" max="120" />
+          <input id="focus-min" type="number" min="1" max="90" />
         </div>
         <div class="row">
           <span class="label">short break<span class="sub">a little breath</span></span>
@@ -1563,7 +1563,7 @@ const saved = load();
 const state = {
   scene: SCENES.some(s => s.id === saved.scene) ? saved.scene : "cairo-dusk",
   durations: {
-    focus: clamp(saved.durations?.focus, 25, 1, 120) * 60,
+    focus: clamp(saved.durations?.focus, 25, 1, 90) * 60,
     short: clamp(saved.durations?.short, 5, 1, 60) * 60,
     long: clamp(saved.durations?.long, 15, 1, 90) * 60,
   },
@@ -1947,7 +1947,7 @@ function buildPips() {
 }
 
 function saveSettings() {
-  state.durations.focus = clamp(el.focusMin.value, 25, 1, 120) * 60;
+  state.durations.focus = clamp(el.focusMin.value, 25, 1, 90) * 60;
   state.durations.short = clamp(el.shortMin.value, 5, 1, 60) * 60;
   state.durations.long = clamp(el.longMin.value, 15, 1, 90) * 60;
   state.beforeLong = clamp(el.cycleCount.value, 4, 1, 12);
